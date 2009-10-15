@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server
+END
+filter.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/filter.js
+END
+loop.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/loop.js
+END
+validate.js
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/validate.js
+END
+util.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/util.js
+END
+views.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/views.js
+END
+render.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/render.js
+END
+state.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/state.js
+END
+mimeparse.js
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/repos/asf/!svn/ver/820165/couchdb/tags/0.10.0/share/server/mimeparse.js
+END
