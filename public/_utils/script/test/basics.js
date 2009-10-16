@@ -32,8 +32,8 @@ couchTests.basics = function(debug) {
   // and it should work for dbs with slashes (COUCHDB-411)
   var dbnames = ["test_suite_db", "test_suite_db%2Fwith_slashes"];
   dbnames.forEach(function(dbname) {
-    xhr = CouchDB.request("DELETE", "/" + dbname);
-    xhr = CouchDB.request("PUT", "/" + dbname);
+    xhr = CouchDB.request("DELETE", "/" + dbname+'/');
+    xhr = CouchDB.request("PUT", "/" + dbname+'/');
     TEquals(dbname,
       xhr.getResponseHeader("Location").substr(-dbname.length),
       "should return Location header to newly created document");

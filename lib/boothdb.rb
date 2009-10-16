@@ -1,8 +1,11 @@
 require 'rubygems'
 require 'sinatra'
 require 'json'
+require 'cgi'
 
 $LOAD_PATH.unshift File.dirname(__FILE__)
+
+Booth ||= {}
 
 mime :json, "application/json"
 
@@ -13,4 +16,5 @@ get '/' do
 end
 
 load 'db_req.rb'
+load 'doc_req.rb'
 
