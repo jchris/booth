@@ -1,15 +1,7 @@
-# json error
-def je code, name, message
-  status code
-  {"error" => name, "reason" => message}.to_json
-end
 
-def j code, json
-  status code
-  json.to_json
-end
 
-put "/:db/" do
+
+put "/:db/?" do
   db = params[:db]
   if Booth[db]
     je(412, "db_exists", "The database already exists.")
@@ -20,22 +12,19 @@ put "/:db/" do
   end
 end
 
-get "/:db/" do
+get "/:db/?" do
   db = params[:db]
   if Booth[db]
     j(200, {
       :db_name => db,
-      :doc_count => db.length
+      :doc_count => Booth[db].length
     })
   else
-    Booth[db] = {}
-    headers "Location" => "/#{CGI.escape(db)}"
     je(404, "not_found", "No database: #{db}")
   end
 end
 
-
-delete "/:db/" do
+delete "/:db/?" do
   db = params[:db]
   if Booth[db]
     Booth.delete(db)
