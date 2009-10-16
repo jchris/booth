@@ -7,6 +7,12 @@ def with_db db
   end
 end
 
+post "/:db/_temp_view/?" do
+  with_db(params[:db]) do |db|
+    j(200,{"ok" => true})
+  end
+end
+
 get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
