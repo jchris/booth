@@ -1,13 +1,18 @@
 require 'rubygems'
 
-require File.join(File.expand_path(File.dirname(__FILE__)),"..","vendor","sinatra","lib","sinatra")
+filepath = File.expand_path(File.dirname(__FILE__))
 
-JS_SERVER_PATH = File.join(File.expand_path(File.dirname(__FILE__)),"..","server","main.js")
+require File.join(filepath,"..","vendor","sinatra","lib","sinatra")
+
+JS_SERVER_PATH = File.join(filepath,"query","server","main.js")
 
 require 'json'
 require 'cgi'
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
+$LOAD_PATH.unshift filepath
+$LOAD_PATH.unshift File.join(filepath,"httpd")
+$LOAD_PATH.unshift File.join(filepath,"query")
+$LOAD_PATH.unshift File.join(filepath,"store")
 
 Booth ||= {}
 
@@ -40,7 +45,7 @@ get "/_uuids" do
   j(200, {"uuids" => uuids})
 end
 
-
+load 'global_req.rb'
 load 'db_req.rb'
 load 'doc_req.rb'
 load 'view_req.rb'
