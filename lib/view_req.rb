@@ -1,3 +1,4 @@
+require 'query_server'
 
 post "/:db/_temp_view/?" do
   with_db(params[:db]) do |db|
@@ -8,11 +9,39 @@ post "/:db/_temp_view/?" do
 end
 
 def buildView(db, map, red)
-  mapper = OSProcess.new()
-  mapper.learn_map(map)
-  db.each do |id, doc|
-    puts doc.inspect
-
+  map_view = []
+  QueryServer.run(:trace) do |qs|
+    raise "qs fun fail" unless qs.run(["add_fun", map])
+    db.each do |id, doc|
+      puts "map"
+      puts doc.inspect
+      fun_rows = qs.run(["map_doc", doc])[0]
+      fun_rows.each do |r|
+        next unless r
+        key = r[0]
+        value = r[1]
+        puts "row #{r.inspect}"
+        map_view.push({:key => key, :value => value, :id => id})
+      end
+    end
+    if red
+      qs.reset!
+      kvs = []
+      map_view.each do |row|
+        kvs << [row[:key], row[:value]]
+      end
+      resp = qs.run(["reduce", [red], kvs])
+      # raise "reduce fail" unless resp[0] == true
+      {
+        :rows => [{:value => resp[1]}],
+        "foo" => "bar"
+      }
+    else
+      {
+        :rows => map_view,
+        :total_rows => map_view.length
+      }
+    end
   end
 end
 

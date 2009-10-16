@@ -2,7 +2,7 @@ require 'rubygems'
 
 require File.join(File.expand_path(File.dirname(__FILE__)),"..","vendor","sinatra","lib","sinatra")
 
-JS_SERVER_PATH = File.join(File.expand_path(File.dirname(__FILE__)),"..","server")
+JS_SERVER_PATH = File.join(File.expand_path(File.dirname(__FILE__)),"..","server","main.js")
 
 require 'json'
 require 'cgi'
