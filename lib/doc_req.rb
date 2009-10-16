@@ -12,7 +12,7 @@ get "/:db/:docid/?" do
   with_db(params[:db]) do |db|
     doc = db[docid]
     if doc
-      j(200, doc.merge("_id" => docid))
+      j(200, doc)
     else
       je(404, 'not_found', "No doc with id: #{docid}")
     end
@@ -25,9 +25,9 @@ put "/:db/:docid/?" do
     doc = JSON.parse(request.body.read)
     rev = "foo"
     db[docid] = doc.merge({
+      "_id" => docid,
       "_rev" => "foo"
     })
-    puts db[docid].inspect
     j(201, {"ok" => true,
       :id => docid,
       :rev => rev})
