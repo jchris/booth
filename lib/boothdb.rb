@@ -1,8 +1,16 @@
 require 'rubygems'
 require 'sinatra'
+require 'json'
 
-COUCHDB_SHARE = File.join(File.expand_path(File.dirname(__FILE__)),"..","share")
+$LOAD_PATH.unshift File.dirname(__FILE__)
+
+mime :json, "application/json"
+
+set :public, File.join(File.expand_path(File.dirname(__FILE__)),"..","public")
 
 get '/' do
-'  {"boothdb"=>"Welcome","version"=>"0"}'
+  {"couchdb"=>"Welcome","version"=>"0"}.to_json
 end
+
+load 'db_req.rb'
+
