@@ -1,17 +1,5 @@
 
-def with_db db
-  if Booth[db]
-    yield Booth[db]
-  else
-    je(404, "not_found", "No database: #{db}")
-  end
-end
 
-post "/:db/_temp_view/?" do
-  with_db(params[:db]) do |db|
-    j(200,{"ok" => true})
-  end
-end
 
 get "/:db/:docid/?" do
   docid = params[:docid]

@@ -32,6 +32,15 @@ get '/' do
   j 200, "couchdb"=>"Welcome","version"=>"0"
 end
 
+require 'uuid'
+get "/_uuids" do
+  uuid = UUID.new
+  uuids = (1..10).collect{uuid.generate}
+  j(200, {"uuids" => uuids})
+end
+
+
 load 'db_req.rb'
 load 'doc_req.rb'
+load 'view_req.rb'
 

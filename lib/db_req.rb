@@ -1,5 +1,13 @@
 
 
+def with_db db
+  if Booth[db]
+    yield Booth[db]
+  else
+    je(404, "not_found", "No database: #{db}")
+  end
+end
+
 
 put "/:db/?" do
   db = params[:db]
@@ -13,14 +21,11 @@ put "/:db/?" do
 end
 
 get "/:db/?" do
-  db = params[:db]
-  if Booth[db]
+  with_db(params[:db]) do |db|
     j(200, {
       :db_name => db,
-      :doc_count => Booth[db].length
-    })
-  else
-    je(404, "not_found", "No database: #{db}")
+      :doc_count => db.length
+    })    
   end
 end
 
