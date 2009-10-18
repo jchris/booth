@@ -40,13 +40,15 @@ describe "Database" do
   it "should allow updates with a good rev" do
     d = @db.get("foo")
     d["bam"].should == "baz"
-    @db.put({
+    new_rev = @db.put({
       "_id" => "foo",
       "_rev" => d.rev,
       "bam" => "duck"
     })
-    d = @db.get("foo")
-    d["bam"].should == "duck"
+    dx = @db.get("foo")
+    dx.rev.should == new_rev
+    new_rev.should != d.rev 
+    dx["bam"].should == "duck"
   end
   describe "seq" do
     before(:each) do

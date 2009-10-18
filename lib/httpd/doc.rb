@@ -2,7 +2,7 @@
 get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
-    doc = db[docid]
+    doc = db.get(docid)
     if doc
       j(200, doc)
     else
@@ -15,11 +15,11 @@ put "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
     doc = JSON.parse(request.body.read)
-    db[docid] = doc
-    doc = db[docid]
+    doc["_id"] = docid
+    rev = db.put(doc)
     j(201, {"ok" => true,
-      :id => doc.id,
-      :rev => doc.rev})
+      :id => docid,
+      :rev => rev})
   end
 end
 

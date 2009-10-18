@@ -62,6 +62,6 @@ class Database
     doc.seq = @seq
     @by_seq[@seq] = doc.id
     @by_docid[doc.id] = doc
-    doc.id
+    doc.rev
   end
 end
