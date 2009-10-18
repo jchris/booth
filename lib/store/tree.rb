@@ -48,7 +48,7 @@ class Tree
   end
   
   def insert(k, v)
-   if @key == nil
+   if @key == nil || @key == k
     @key = k
     @value = v
    elsif k <= @key

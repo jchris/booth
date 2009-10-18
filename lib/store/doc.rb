@@ -4,12 +4,15 @@ class Doc < Hash
   attr_accessor :revs
   def initialize(c = {})
     if c.is_a?(Hash)
+      jrev = c.delete("_rev")
       super()
       update(c)
     else
       super(c)
     end
-    if !self.rev
+    if jrev
+      @revs = [jrev]
+    else
       @revs = [rev_string()]
     end
   end

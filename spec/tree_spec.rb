@@ -10,7 +10,6 @@ describe "Tree" do
   end
   it "should return values" do
     @t["f"].should == "ff"
-    puts @t
   end
   it "should do a keyscan" do
     a = [];

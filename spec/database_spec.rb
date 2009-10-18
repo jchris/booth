@@ -28,7 +28,66 @@ describe "Database" do
     d2.seq.should == 2
     @db.seq.should == 2
   end
-  it "should require revs for updates" do
-    
+  it "should fail updates with a bad rev" do
+    lambda {
+      @db.put({
+        "_id" => "foo",
+        "_rev" => "555",
+        "bam" => "duck"
+      })      
+    }.should raise_error
+  end
+  it "should allow updates with a good rev" do
+    d = @db.get("foo")
+    d["bam"].should == "baz"
+    @db.put({
+      "_id" => "foo",
+      "_rev" => d.rev,
+      "bam" => "duck"
+    })
+    d = @db.get("foo")
+    d["bam"].should == "duck"
+  end
+  describe "seq" do
+    before(:each) do
+      @db.put({
+        "_id" => "bar",
+        "bam" => "dog"
+      })
+    end
+    it "should increment on doc" do
+      d = @db.get("foo")
+      d.seq.should == 1
+      @db.put({
+        "_id" => "foo",
+        "_rev" => d.rev,
+        "bam" => "duck"
+      })
+      d = @db.get("foo")
+      d.seq.should == 3
+    end
+    it "should be viewable" do
+      a = []
+      @db.by_seq({:startkey => 0}) do |k, v|
+        a << v.id
+      end
+      a[0].should == "foo"
+      a[1].should == "bar"
+    end
+    it "should be sparse" do
+      d = @db.get("foo")
+      d.seq.should == 1
+      @db.put({
+        "_id" => "foo",
+        "_rev" => d.rev,
+        "bam" => "duck"
+      })
+      a = []
+      @db.by_seq({:startkey => 0}) do |k, v|
+        a << v.id
+      end
+      a[0].should == "bar"
+      a[1].should == "foo"
+    end
   end
 end
