@@ -1,16 +1,25 @@
 class Doc < Hash
+  
   attr_accessor :seq
-  def initialize(constructor = {})
-    if constructor.is_a?(Hash)
+  attr_accessor :revs
+  def initialize(c = {})
+    if c.is_a?(Hash)
       super()
-      update(constructor)
+      update(c)
     else
-      super(constructor)
+      super(c)
+    end
+    if !self.rev
+      @revs = [rev_string()]
     end
   end
   
   def id
     self["_id"]
+  end
+  
+  def rev
+    @revs && @revs.first
   end
   
   private
@@ -20,5 +29,8 @@ class Doc < Hash
     end
     self
   end
-
+  def rev_string
+    uuid = UUID.new
+    uuid.generate
+  end
 end

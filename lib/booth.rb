@@ -8,6 +8,7 @@ JS_SERVER_PATH = File.join(filepath,"query","server","main.js")
 
 require 'json'
 require 'cgi'
+require 'uuid'
 
 $LOAD_PATH.unshift filepath
 $LOAD_PATH.unshift File.join(filepath,"httpd")

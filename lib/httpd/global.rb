@@ -1,4 +1,3 @@
-require 'uuid'
 
 get '/' do
   j 200, "couchdb"=>"Welcome","version"=>"0"
