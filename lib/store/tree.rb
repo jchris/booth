@@ -23,18 +23,18 @@ class Tree
   end
 
   def fold opts={}, &b
-    if (opts[:startkey]) 
-      st = search(opts[:startkey])
-      if (st) 
-        if (st.parent) 
-          st.parent.fold(opts, &b)
-        else 
-          st.fold({}, &b)
-        end
-      end
+    sk = opts[:startkey]    
+    if (sk)
+      foldl(sk, &b)
     else
       inorder &b      
     end
+  end
+  
+  def foldl sk, &b
+    @left.foldl(sk, &b) if @left != nil
+    b.call(@key, @value) if @key >= sk
+    @right.foldl(sk, &b) if @right != nil && @right.key >= sk
   end
   
   def to_s
