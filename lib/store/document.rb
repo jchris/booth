@@ -1,4 +1,4 @@
-class Doc < Hash
+class Document < Hash
   
   attr_accessor :seq
   attr_accessor :revs

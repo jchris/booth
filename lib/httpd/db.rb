@@ -24,7 +24,7 @@ get "/:db/?" do
   with_db(params[:db]) do |db|
     j(200, {
       :db_name => params[:db],
-      :doc_count => db.length
+      :doc_count => db.doc_count
     })    
   end
 end

@@ -12,7 +12,7 @@ def buildView(db, map, red)
   map_view = []
   QueryServer.run(:trace) do |qs|
     raise "qs fun fail" unless qs.run(["add_fun", map])
-    db.each do |id, doc|
+    db.by_seq(:startkey => 0) do |seq, doc|
       puts "map"
       puts doc.inspect
       fun_rows = qs.run(["map_doc", doc])[0]
@@ -21,7 +21,7 @@ def buildView(db, map, red)
         key = r[0]
         value = r[1]
         puts "row #{r.inspect}"
-        map_view.push({:key => key, :value => value, :id => id})
+        map_view.push({:key => key, :value => value, :id => doc.id})
       end
     end
     puts "red #{red.inspect}"
