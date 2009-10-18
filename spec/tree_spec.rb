@@ -24,11 +24,22 @@ describe "Tree" do
     @t.fold({
       :startkey => "c"
     }) do |k, v|
-      puts k
       a << k
     end
     a[0].should == "c"
     a[1].should == "d"
     a[2].should == "e"
+  end
+  it "should do a keyscan from a startkey to and endkey" do
+    a = [];
+    @t.fold({
+      :startkey => "c",
+      :endkey => "d "
+    }) do |k, v|
+      a << k
+    end
+    a[0].should == "c"
+    a[1].should == "d"
+    a[2].should be_nil
   end
 end
