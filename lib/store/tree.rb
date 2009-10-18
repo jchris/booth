@@ -4,12 +4,14 @@ class Tree
   attr_accessor :right
   attr_accessor :key
   attr_accessor :value
+  attr_accessor :parent
 
-  def initialize(k=nil, v=nil)
+  def initialize(k=nil, v=nil, p=nil)
     @left = nil
     @right = nil
     @key = k
     @value = v
+    @parent = p
   end
 
   def []= k, v
@@ -23,8 +25,13 @@ class Tree
   def fold opts={}, &b
     if (opts[:startkey]) 
       st = search(opts[:startkey])
-      puts st.inspect
-      st.inorder &b
+      if (st) 
+        if (st.parent) 
+          st.parent.fold(opts, &b)
+        else 
+          st.fold({}, &b)
+        end
+      end
     else
       inorder &b      
     end
@@ -43,13 +50,13 @@ class Tree
     @value = v
    elsif k <= @key
     if @left == nil
-     @left = Tree.new k, v
+     @left = Tree.new k, v, self
     else
      @left.insert k, v
     end
    else
     if @right == nil
-     @right = Tree.new k, v
+     @right = Tree.new k, v, self
     else
      @right.insert k, v
     end
