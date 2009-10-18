@@ -14,7 +14,7 @@ put "/:db/?" do
   if Booth[db]
     je(412, "db_exists", "The database already exists.")
   else
-    Booth[db] = {}
+    Booth[db] = Database.new
     headers "Location" => "/#{CGI.escape(db)}"
     j(201, {"ok" => true})
   end

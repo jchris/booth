@@ -14,6 +14,8 @@ $LOAD_PATH.unshift File.join(filepath,"httpd")
 $LOAD_PATH.unshift File.join(filepath,"query")
 $LOAD_PATH.unshift File.join(filepath,"store")
 
+require 'database'
+
 Booth ||= {}
 
 # TODO Help! I want code reloading during dev.
