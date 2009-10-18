@@ -1,7 +1,6 @@
 class Document < Hash
   
   attr_accessor :seq
-  attr_accessor :revs
   def initialize(c = {})
     if c.is_a?(Hash)
       jrev = c.delete("_rev")
@@ -10,11 +9,12 @@ class Document < Hash
     else
       super(c)
     end
-    if jrev
-      @revs = [jrev]
+    self["_rev"] = if jrev
+      jrev
     else
-      @revs = [rev_string()]
+      rev_string()
     end
+    
   end
   
   def id
@@ -22,7 +22,7 @@ class Document < Hash
   end
   
   def rev
-    @revs && @revs.first
+    self["_rev"]
   end
   
   private
