@@ -45,3 +45,25 @@ and then visit:
     http://localhost:4567/_utils/couch_tests.html
 
 and run the tests.
+
+## Contribute
+
+Fork. Pick a test, get to green. If you know CouchDB a little, you should be able to tell from it which tests will be easy to fix based on the ones that run.
+
+Some tests require commenting out -- there are certain features (for instance: keeping old revs around) that Booth doesn't bother with, as it is an in-memory store.
+
+Also -- incremental improvements help a lot. Even getting one more assertion to pass is a patch I'll merge.
+
+### High-level status
+
+The Tree class is getting most of the needed features, but could be self-balancing. Also it still needs analysis about which are public and private methods.
+
+Database and Document are mostly right, but some thought needs to go into a JSON abstraction layer for documents.
+
+The Sinatra parts are pretty self explanatory.
+
+Temp views barely work. They are recalculated at run-time for every query, and don't have start and end keys yet. However, the do use the couchjs/main.js CouchDB JavaScript process, so once they are hooked to proper Trees they should be mostly real.
+
+I'm really trying hard not to get to Ruby-ish with the coding style, so please hold back on "I refactored and everything's a module..." refactors. The purpose of this CouchDB implementation isn't to be perfect, but to be an easy reference for people considering porting CouchDB to other languages.
+
+
