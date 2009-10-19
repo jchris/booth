@@ -65,13 +65,18 @@ get "/:db/_changes" do
   with_db(params[:db]) do |db|
     rows = []
     db.by_seq(params) do |seq, doc|
-      rows << {
+      r = {
         "id" => doc.id,
         "seq" => seq,
         "changes" => [{
           "rev" => doc.rev
         }]
       }
+      if params[:include_docs] == "true"
+        r["doc"] = doc
+      end
+      r["deleted"] = true if doc.deleted
+      rows << r
     end
     j(200, {"results" => rows,"total_rows" => db.doc_count})
   end

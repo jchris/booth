@@ -8,6 +8,17 @@ post "/:db/_temp_view/?" do
   end
 end
 
+def view_params p
+  [:startkey, :endkey, :key].each do |k|
+    p[k] = fromJSON(p[k]) if p[k]
+  end
+  p
+end
+
+def fromJSON(v)
+  JSON.parse("[#{v}]")[0]
+end
+
 def buildView(db, map, red)
   map_view = []
   QueryServer.run(:trace) do |qs|
