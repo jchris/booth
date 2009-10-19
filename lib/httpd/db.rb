@@ -61,6 +61,21 @@ get "/:db/_all_docs" do
   end
 end
 
+get "/:db/_changes" do
+  with_db(params[:db]) do |db|
+    rows = []
+    db.by_seq(params) do |seq, doc|
+      rows << {
+        "id" => doc.id,
+        "seq" => seq,
+        "changes" => [{
+          "rev" => doc.rev
+        }]
+      }
+    end
+    j(200, {"results" => rows,"total_rows" => db.doc_count})
+  end
+end
 
 post "/:db/_all_docs" do
   with_db(params[:db]) do |db|

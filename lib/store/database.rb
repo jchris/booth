@@ -9,7 +9,7 @@ class Database
     @seq = 0
     @doc_count = 0
   end
-  def by_seq opts, &b
+  def by_seq opts={}, &b
     @by_seq.fold(opts) do |seq, docid|
       if (docid)
         b.call(seq, @by_docid[docid])
@@ -18,6 +18,7 @@ class Database
   end
   def all_docs opts={}, &b
     @by_docid.fold(opts) do |docid, doc|
+      next if doc.deleted
       b.call(docid, doc)
     end
   end
