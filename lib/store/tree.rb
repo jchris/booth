@@ -40,6 +40,14 @@ class Tree
       (!sk || @right.key >= sk)
   end
   
+  def foldr sk=nil, ek=nil, &b
+    @right.foldl(sk, ek, &b) if @right != nil
+    return if ek && ek <= @key
+    b.call(@key, @value) if !sk || @key >= sk
+    @left.foldl(sk, ek, &b) if @left != nil && 
+      (!sk || @left.key >= sk)
+  end
+  
   def to_s
      "[" +
      if left then left.to_s + "," else "" end +

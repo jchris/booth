@@ -41,4 +41,11 @@ describe "Tree" do
     a[1].should == "d"
     a[2].should be_nil
   end
+  it "should do a descending keyscan" do
+    a = [];
+    @t.fold(:descending => true) do |k, v|
+      a << k
+    end
+    a[0].should == "g"
+  end
 end
