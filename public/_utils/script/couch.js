@@ -207,12 +207,12 @@ function CouchDB(name, httpHeaders) {
     return this.allDocs({startkey:"_design", endkey:"_design0"});
   };
 
-  this.allDocsBySeq = function(options,keys) {
+  this.changes = function(options,keys) {
     var req = null;
     if(!keys) {
-      req = this.request("GET", this.uri + "_all_docs_by_seq" + encodeOptions(options));
+      req = this.request("GET", this.uri + "_changes" + encodeOptions(options));
     } else {
-      req = this.request("POST", this.uri + "_all_docs_by_seq" + encodeOptions(options), {
+      req = this.request("POST", this.uri + "_changes" + encodeOptions(options), {
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({keys:keys})
       });
@@ -387,9 +387,12 @@ CouchDB.getVersion = function() {
 CouchDB.replicate = function(source, target, rep_options) {
   rep_options = rep_options || {};
   var headers = rep_options.headers || {};
+  var body = rep_options.body || {};
+  body.source = source;
+  body.target = target;
   CouchDB.last_req = CouchDB.request("POST", "/_replicate", {
     headers: headers,
-    body: JSON.stringify({source: source, target: target})
+    body: JSON.stringify(body)
   });
   CouchDB.maybeThrowError(CouchDB.last_req);
   return JSON.parse(CouchDB.last_req.responseText);
@@ -426,13 +429,15 @@ CouchDB.requestStats = function(module, key, test) {
     query_arg = "?flush=true";
   }
 
-  var stat = CouchDB.request("GET", "/_stats/" + module + "/" + key + query_arg).responseText;
+  var url = "/_stats/" + module + "/" + key + query_arg;
+  var stat = CouchDB.request("GET", url).responseText;
   return JSON.parse(stat)[module][key];
 }
 
 CouchDB.uuids_cache = [];
 
-CouchDB.newUuids = function(n) {
+CouchDB.newUuids = function(n, buf) {
+  buf = buf || 100;
   if (CouchDB.uuids_cache.length >= n) {
     var uuids = CouchDB.uuids_cache.slice(CouchDB.uuids_cache.length - n);
     if(CouchDB.uuids_cache.length - n == 0) {
@@ -443,12 +448,12 @@ CouchDB.newUuids = function(n) {
     }
     return uuids;
   } else {
-    CouchDB.last_req = CouchDB.request("GET", "/_uuids?count=" + (100 + n));
+    CouchDB.last_req = CouchDB.request("GET", "/_uuids?count=" + (buf + n));
     CouchDB.maybeThrowError(CouchDB.last_req);
     var result = JSON.parse(CouchDB.last_req.responseText);
     CouchDB.uuids_cache =
-        CouchDB.uuids_cache.concat(result.uuids.slice(0, 100));
-    return result.uuids.slice(100);
+        CouchDB.uuids_cache.concat(result.uuids.slice(0, buf));
+    return result.uuids.slice(buf);
   }
 }
 

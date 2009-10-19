@@ -12,6 +12,7 @@
 
 // *********************** Test Framework of Sorts ************************* //
 
+
 function loadScript(url) {
   if (typeof document != "undefined") document.write('<script src="'+url+'"></script>');
 };
@@ -50,7 +51,9 @@ function runAllTests() {
       runTest($("th button", row).get(0), function() {
         offset += 1;
         setTimeout(runNext, 100);
-      });
+      }, false, true);
+    } else {
+      saveTestReport();
     }
   }
   runNext();
@@ -59,7 +62,7 @@ function runAllTests() {
 var numFailures = 0;
 var currentRow = null;
 
-function runTest(button, callback, debug) {
+function runTest(button, callback, debug, noSave) {
   if (currentRow != null) {
     alert("Can not run multiple tests simultaneously.");
     return;
@@ -101,6 +104,7 @@ function runTest(button, callback, debug) {
     updateTestsFooter();
     currentRow = null;
     if (callback) callback();
+    if (!noSave) saveTestReport();
   }
   $("td.status", row).addClass("running").text("running…");
   setTimeout(run, 100);
@@ -142,9 +146,77 @@ function updateTestsFooter() {
     var text = $(this).text();
     totalDuration += parseInt(text.substr(0, text.length - 2), 10);
   });
-  $("#tests tbody.footer td").text(testsRun.length + " of " + tests.length +
+  $("#tests tbody.footer td").html("<span>"+testsRun.length + " of " + tests.length +
     " test(s) run, " + testsFailed.length + " failures (" +
-    totalDuration + " ms)");
+    totalDuration + " ms)</span> ");
+}
+
+// make report and save to local db
+// display how many reports need replicating to the mothership
+// have button to replicate them
+
+function saveTestReport(report) {
+  var report = makeTestReport();
+  if (report) {
+    var db = $.couch.db("test_suite_reports");
+    var saveReport = function(db_info) {
+      report.db = db_info;
+      $.couch.info({success : function(node_info) {
+        report.node = node_info;
+        db.saveDoc(report);        
+      }})
+    };
+    var createDb = function() {
+      db.create({success: function() {
+        db.info({success:saveReport});        
+      }});    
+    }
+    db.info({error: createDb, success:saveReport});
+  }
+};
+
+function makeTestReport() {
+  var report = {};
+  report.summary = $("#tests tbody.footer td").text();
+  report.platform = testPlatform();
+  var date = new Date();
+  report.timestamp = date.getTime();
+  report.timezone = date.getTimezoneOffset();
+  report.tests = [];
+  $("#tests tbody.content tr").each(function() {
+    var status = $("td.status", this).text();
+    if (status != "not run") {
+      var test = {};
+      test.name = this.id;
+      test.status = status;
+      test.duration = parseInt($("td.duration", this).text());
+      test.details = [];
+      $("td.details li", this).each(function() {
+        test.details.push($(this).text());
+      });
+      if (test.details.length == 0) {
+        delete test.details;
+      }
+      report.tests.push(test);
+    }
+  });
+  if (report.tests.length > 0) return report;
+};
+
+function testPlatform() {
+  var b = $.browser;
+  var bs = ["mozilla", "msie", "opera", "safari"];
+  for (var i=0; i < bs.length; i++) {
+    if (b[bs[i]]) {
+      return {"browser" : bs[i], "version" : b.version};
+    }
+  };
+  return {"browser" : "undetected"};
+}
+
+
+function reportTests() {
+  // replicate the database to couchdb.couchdb.org
 }
 
 // Use T to perform a test that returns false on failure and if the test fails,
@@ -157,8 +229,9 @@ function T(arg1, arg2, testName) {
       if ($("td.details ol", currentRow).length == 0) {
         $("<ol></ol>").appendTo($("td.details", currentRow));
       }
+      var message = (arg2 != null ? arg2 : arg1).toString();
       $("<li><b>Assertion " + (testName ? "'" + testName + "'" : "") + " failed:</b> <code class='failure'></code></li>")
-        .find("code").text((arg2 != null ? arg2 : arg1).toString()).end()
+        .find("code").text(message).end()
         .appendTo($("td.details ol", currentRow));
     }
     numFailures += 1
@@ -187,3 +260,4 @@ function repr(val) {
     return JSON.stringify(val);
   }
 }
+

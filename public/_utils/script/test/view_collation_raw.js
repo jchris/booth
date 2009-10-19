@@ -10,7 +10,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-couchTests.view_collation = function(debug) {
+couchTests.view_collation_raw = function(debug) {
   var db = new CouchDB("test_suite_db", {"X-Couch-Full-Commit":"false"});
   db.deleteDb();
   db.createDb();
@@ -21,35 +21,16 @@ couchTests.view_collation = function(debug) {
 
   var values = [];
 
-  // special values sort before all other types
-  values.push(null);
-  values.push(false);
-  values.push(true);
-
-  // then numbers
+  //  numbers
   values.push(1);
   values.push(2);
-  values.push(3.0);
+  values.push(3);
   values.push(4);
-
-  // then text, case sensitive
-  values.push("a");
-  values.push("A");
-  values.push("aa");
-  values.push("b");
-  values.push("B");
-  values.push("ba");
-  values.push("bb");
-
-  // then arrays. compared element by element until different.
-  // Longer arrays sort after their prefixes
-  values.push(["a"]);
-  values.push(["b"]);
-  values.push(["b","c"]);
-  values.push(["b","c", "a"]);
-  values.push(["b","d"]);
-  values.push(["b","d", "e"]);
-
+  
+  values.push(false);
+  values.push(null);
+  values.push(true);
+  
   // then object, compares each key value in the list until different.
   // larger objects sort after their subset objects.
   values.push({a:1});
@@ -63,50 +44,80 @@ couchTests.view_collation = function(debug) {
                            // that doesn't preserve order)
   values.push({b:2, c:2});
 
+  // then arrays. compared element by element until different.
+  // Longer arrays sort after their prefixes
+  values.push(["a"]);
+  values.push(["b"]);
+  values.push(["b","c"]);
+  values.push(["b","c", "a"]);
+  values.push(["b","d"]);
+  values.push(["b","d", "e"]);
+
+
+  // then text, case sensitive
+  values.push("A");
+  values.push("B");
+  values.push("a");
+  values.push("aa");
+  values.push("b");
+  values.push("ba");
+  values.push("bb");
+
   for (var i=0; i<values.length; i++) {
     db.save({_id:(i).toString(), foo:values[i]});
   }
 
-  var queryFun = function(doc) { emit(doc.foo, null); };
-  var rows = db.query(queryFun).rows;
+  var designDoc = {
+    _id:"_design/test", // turn off couch.js id escaping?
+    language: "javascript",
+    views: {
+      test: {map: "function(doc) { emit(doc.foo, null); }",
+            options: {collation:"raw"}}
+    }
+  }
+  T(db.save(designDoc).ok);
+  var rows = db.view("test/test").rows;
   for (i=0; i<values.length; i++) {
     T(equals(rows[i].key, values[i]));
   }
 
   // everything has collated correctly. Now to check the descending output
-  rows = db.query(queryFun, null, {descending: true}).rows;
+  rows = db.view("test/test", {descending: true}).rows;
   for (i=0; i<values.length; i++) {
     T(equals(rows[i].key, values[values.length - 1 -i]));
   }
 
   // now check the key query args
   for (i=1; i<values.length; i++) {
-    var queryOptions = {key:values[i]};
-    rows = db.query(queryFun, null, queryOptions).rows;
+    rows = db.view("test/test", {key:values[i]}).rows;
     T(rows.length == 1 && equals(rows[0].key, values[i]));
   }
 
   // test inclusive_end=true (the default)
   // the inclusive_end=true functionality is limited to endkey currently
   // if you need inclusive_start=false for startkey, please do implement. ;)
-  var rows = db.query(queryFun, null, {endkey : "b", inclusive_end:true}).rows;
+  var rows = db.view("test/test", {endkey : "b", inclusive_end:true}).rows;
   T(rows[rows.length-1].key == "b")
   // descending=true
-  var rows = db.query(queryFun, null, {endkey : "b",
+  var rows = db.view("test/test", {endkey : "b",
     descending:true, inclusive_end:true}).rows;
   T(rows[rows.length-1].key == "b")
 
   // test inclusive_end=false
-  var rows = db.query(queryFun, null, {endkey : "b", inclusive_end:false}).rows;
+  var rows = db.view("test/test", {endkey : "b", inclusive_end:false}).rows;
   T(rows[rows.length-1].key == "aa")
   // descending=true
-  var rows = db.query(queryFun, null, {endkey : "b",
+  var rows = db.view("test/test", {endkey : "b",
     descending:true, inclusive_end:false}).rows;
-  T(rows[rows.length-1].key == "B")
-
-  // inclusive_end=false overrides endkey_docid
-  var rows = db.query(queryFun, null, {
-    endkey : "b", endkey_docid: "b",
+  T(rows[rows.length-1].key == "ba")
+  
+  var rows = db.view("test/test", {
+    endkey : "b", endkey_docid: "10",
+    inclusive_end:false}).rows;
+  T(rows[rows.length-1].key == "aa")
+  
+  var rows = db.view("test/test", {
+    endkey : "b", endkey_docid: "11",
     inclusive_end:false}).rows;
   T(rows[rows.length-1].key == "aa")
 };
