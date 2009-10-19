@@ -16,6 +16,11 @@ class Database
       end
     end
   end
+  def all_docs opts={}, &b
+    @by_docid.fold(opts) do |docid, doc|
+      b.call(docid, doc)
+    end
+  end
   def delete docid, rev
     doc = {
       "_id" => docid,

@@ -15,8 +15,7 @@ put "/:db/?" do
     je(412, "db_exists", "The database already exists.")
   else
     Booth[db] = Database.new
-    headers "Location" => "/#{CGI.escape(db)}"
-    j(201, {"ok" => true})
+    j(201, {"ok" => true}, {"Location" => "/#{CGI.escape(db)}"})
   end
 end
 
@@ -45,6 +44,23 @@ post "/:db/_bulk_docs" do
     
   end
 end
+
+get "/:db/_all_docs" do
+  with_db(params[:db]) do |db|
+    rows = []
+    db.all_docs(params) do |docid, doc|
+      rows << {
+        "id" => docid,
+        "key" => docid,
+        "value" => {
+          "rev" => doc.rev
+        }
+      }
+    end
+    j(200, {"rows" => rows,"total_rows" => db.doc_count})
+  end
+end
+
 
 post "/:db/_all_docs" do
   with_db(params[:db]) do |db|
