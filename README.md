@@ -2,7 +2,7 @@
 
 ## The Test Suite
 
-Booth is an attempt to get the [CouchDB Test Suite]() to pass against an alternate implementation.
+Booth is an attempt to get the [CouchDB Test Suite](http://127.0.0.1:5984/_utils/couch_tests.html) to pass against an alternate implementation.
 
 This should hella easy because the CouchDB Test Suite just runs in the browser.
 
@@ -64,6 +64,6 @@ The Sinatra parts are pretty self explanatory.
 
 Temp views barely work. They are recalculated at run-time for every query, and don't have start and end keys yet. However, the do use the couchjs/main.js CouchDB JavaScript process, so once they are hooked to proper Trees they should be mostly real.
 
-I'm really trying hard not to get to Ruby-ish with the coding style, so please hold back on "I refactored and everything's a module..." refactors. The purpose of this CouchDB implementation isn't to be perfect, but to be an easy reference for people considering porting CouchDB to other languages.
+I'm really trying hard not too get to Ruby-ish with the coding style, so please hold back on "I refactored and everything's a module..." refactors. The purpose of this CouchDB implementation isn't to be perfect, but to be an easy reference for people considering porting CouchDB to other languages.
 
 
