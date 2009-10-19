@@ -33,3 +33,15 @@ A: Start shouting about Booth on Twitter and I'll probably notice.
 
 Q: Why "Booth"?
 A: It's named after [Special Agent Seeley Booth](http://en.wikipedia.org/wiki/Seeley_Booth) from Bones.
+
+## Get Started
+
+Booth is just a Sinatra server, so to start it, run:
+
+    ruby lib/booth.rb
+
+and then visit:
+
+    http://localhost:4567/_utils/couch_tests.html
+
+and run the tests.

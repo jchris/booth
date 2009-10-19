@@ -131,6 +131,8 @@ couchTests.basics = function(debug) {
 
   T(results.rows[0].value == 33);
 
+  T(db.save(existingDoc).ok);
+
   // delete a document
   T(db.deleteDoc(existingDoc).ok);
 
@@ -143,14 +145,15 @@ couchTests.basics = function(debug) {
   T(results.total_rows == 2);
   T(db.info().doc_count == 5);
 
+  // removed because Booth doesn't keep old revs at all
   // make sure we can still open the old rev of the deleted doc
-  T(db.open(existingDoc._id, {rev: existingDoc._rev}) != null);
-  // make sure restart works
-  T(db.ensureFullCommit().ok);
-  restartServer();
-
-  // make sure we can still open
-  T(db.open(existingDoc._id, {rev: existingDoc._rev}) != null);
+  // T(db.open(existingDoc._id, {rev: existingDoc._rev}) != null);
+  // // make sure restart works
+  // T(db.ensureFullCommit().ok);
+  // restartServer();
+  // 
+  // // make sure we can still open
+  // T(db.open(existingDoc._id, {rev: existingDoc._rev}) != null);
 
   // test that the POST response has a Location header
   var xhr = CouchDB.request("POST", "/test_suite_db", {

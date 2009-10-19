@@ -14,7 +14,7 @@ class Document < Hash
     else
       rev_string()
     end
-    
+    validate_keys!
   end
   
   def id
@@ -23,6 +23,10 @@ class Document < Hash
   
   def rev
     self["_rev"]
+  end
+  
+  def deleted
+    self["_deleted"]
   end
   
   private
@@ -35,5 +39,13 @@ class Document < Hash
   def rev_string
     uuid = UUID.new
     uuid.generate
+  end
+  def validate_keys!
+    special_keys = %w{_id _rev _deleted}
+    self.each do |k,v|
+      if k[0] == "_"
+        raise BoothError.new(500, "doc_validation", "bad special field '#{k}'") unless special_keys.include?(k)
+      end
+    end
   end
 end

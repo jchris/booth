@@ -38,3 +38,19 @@ delete "/:db/?" do
     je(404, "not_found", "No database: #{db}")
   end
 end
+
+post "/:db/_bulk_docs" do
+  with_db(params[:db]) do |db|
+    docs = jbody
+    
+  end
+end
+
+post "/:db/_all_docs" do
+  with_db(params[:db]) do |db|
+    query = jbody
+    unless query["keys"].is_a?(Array)
+      raise BoothError.new(400, "bad_request", "`keys` member must be a array.");
+    end
+  end
+end

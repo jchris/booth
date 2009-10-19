@@ -16,24 +16,15 @@ class Database
       end
     end
   end
-  def each opts, &b
-    
-  end
-  def []= docid, doc
-    doc["_id"] ||= docid
-    raise "invalid id" if doc["_id"] != docid
-    put doc
-  end
-  def [] docid
-    get docid
-  end
-  def delete doc
-    {
-      "_id" => doc["_id"],
-      "_rev" => doc["_rev"],
+  def delete docid, rev
+    doc = {
+      "_id" => docid,
+      "_rev" => rev,
       "_deleted" => true
     }
-    put doc
+    new_rev = put doc
+    @doc_count -= 1
+    new_rev
   end
   def put doc
     doc = Document.new(doc)
@@ -41,14 +32,21 @@ class Database
       if doc.rev == old_doc.rev
         put_doc doc, old_doc
       else
-        raise "rev conflict"
+        raise BoothError.new(412, "conflict", "rev mismatch, need '#{old_doc.rev}'");
       end
     else
       put_doc doc
     end
   end
   def get docid
-    @by_docid[docid]
+    doc = @by_docid[docid]
+    if !doc
+      raise BoothError.new(404, "not_found", "missing");
+    elsif doc.deleted
+      raise BoothError.new(404, "not_found", "deleted");
+    else
+      doc
+    end
   end
   private
   def put_doc doc, old=nil

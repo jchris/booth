@@ -19,10 +19,31 @@ require 'database'
 
 Booth ||= {}
 
+class BoothError < StandardError
+  attr_reader :code
+  def initialize code, error, reason
+    @code = code
+    @error = error
+    @reason = reason
+  end
+  def to_json
+    to_hash.to_json
+  end
+  def to_hash
+    {"error" => @error, "reason" => @reason}
+  end
+end
+
 # TODO Help! I want code reloading during dev.
 
 set :public, File.join(filepath,"..","public")
+set :show_exceptions, false
+set :raise_errors, false
 
+error(BoothError) do
+  be =  @env['sinatra.error']
+  [be.code, {}, be.to_json]
+end
 
 load 'global.rb'
 load 'db.rb'
