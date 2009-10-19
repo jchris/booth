@@ -24,27 +24,28 @@ class Tree
   def fold opts={}, &b
     sk = opts[:startkey] || nil
     ek = opts[:endkey] || nil
-    desc = opts[:descending] || false
+    desc = opts[:descending] == "true"
     if (desc)
-      foldr(sk, ek, &b)
+      foldr(0, sk, ek, &b)
     else
-      foldl(sk, ek, &b)
+      foldl(0, sk, ek, &b)
     end
   end
   
-  def foldl sk=nil, ek=nil, &b
-    @left.foldl(sk, ek, &b) if @left != nil
-    return if ek && ek <= @key
+  def foldl off, sk=nil, ek=nil, &b
+    @left.foldl(off+1, sk, ek, &b) if @left != nil
+    return off if ek && ek <= @key
     b.call(@key, @value) if !sk || @key >= sk
-    @right.foldl(sk, ek, &b) if @right != nil && 
+    @right.foldl(off, sk, ek, &b) if @right != nil && 
       (!sk || @right.key >= sk)
+    off
   end
   
-  def foldr sk=nil, ek=nil, &b
-    @right.foldl(sk, ek, &b) if @right != nil
+  def foldr off, sk=nil, ek=nil, &b
+    @right.foldr(off, sk, ek, &b) if @right != nil
     return if ek && ek <= @key
     b.call(@key, @value) if !sk || @key >= sk
-    @left.foldl(sk, ek, &b) if @left != nil && 
+    @left.foldr(off, sk, ek, &b) if @left != nil && 
       (!sk || @left.key >= sk)
   end
   
