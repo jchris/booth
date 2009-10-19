@@ -47,5 +47,6 @@ describe "Tree" do
       a << k
     end
     a[0].should == "g"
+    a[1].should == "f"
   end
 end

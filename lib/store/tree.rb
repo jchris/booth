@@ -41,10 +41,10 @@ class Tree
   end
   
   def foldr sk=nil, ek=nil, &b
-    @right.foldl(sk, ek, &b) if @right != nil
+    @right.foldr(sk, ek, &b) if @right != nil
     return if ek && ek <= @key
     b.call(@key, @value) if !sk || @key >= sk
-    @left.foldl(sk, ek, &b) if @left != nil && 
+    @left.foldr(sk, ek, &b) if @left != nil && 
       (!sk || @left.key >= sk)
   end
   
