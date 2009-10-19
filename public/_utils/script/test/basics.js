@@ -135,7 +135,7 @@ couchTests.basics = function(debug) {
 
   // delete a document
   T(db.deleteDoc(existingDoc).ok);
-
+  T(db.info()); // added because of race condition
   // make sure we can't open the doc
   T(db.open(existingDoc._id) == null);
 
