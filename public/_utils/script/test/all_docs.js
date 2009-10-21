@@ -90,6 +90,6 @@ couchTests.all_docs = function(debug) {
   db.save({_id: "Z", foo: "Z"});
   db.save({_id: "a", foo: "a"});
 
-  var rows = db.allDocs({startkey: "Z", endkey: "Z"}).rows;
+  var rows = db.allDocs({startkey: "Z", endkey: "Z "}).rows;
   T(rows.length == 1);
 };

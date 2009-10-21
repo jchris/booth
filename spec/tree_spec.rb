@@ -41,6 +41,21 @@ describe "Tree" do
     a[1].should == "d"
     a[2].should be_nil
   end
+  it "should do a keyscan from a startkey to and endkey" do
+    a = [];
+    @t["Z"] = "foo"
+    @t["D"] = "fox"
+    @t.fold({
+      :startkey => "B",
+      :endkey => "d"
+    }) do |k, v|
+      a << k
+    end
+    a[0].should == "D"
+    a.last.should == "c"
+    a.length.should == 5
+
+  end
   it "should do a descending keyscan" do
     a = [];
     @t.fold(:descending => "true") do |k, v|
