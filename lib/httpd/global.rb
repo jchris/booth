@@ -12,7 +12,7 @@ post '/_restart' do
 end
 
 get "/_uuids" do
-  uuid = UUID.new
+  uuid = BOOTH_UUID
   count = if params[:count]
     params[:count].to_i
   else

@@ -15,8 +15,7 @@ post "/:db/?" do
   with_db(params[:db]) do |db|
     doc = jbody("Document must be a JSON object")
     if !doc["_id"]
-      uuid = UUID.new
-      doc["_id"] = uuid.generate
+      doc["_id"] = BOOTH_UUID.generate
     end
     rev = db.put(doc)
     j(201, {"ok" => true,
@@ -81,17 +80,31 @@ put "/:db/:docid/*" do
   rev = params[:rev]
   att_name = params[:splat][0]
   with_db(params[:db]) do |db|
-    doc = db.get(docid)
-    if doc
-      att = {}
-      att["data"] = request.body.read
-      att["content_type"] =  @env["CONTENT_TYPE"]
-      new_rev = doc.attachment_put(rev, att_name, att)
-      # new_rev = db.put(doc)
-      headers("Location" => ["",params[:db],docid,params[:att]].join('/'))
-      j(201, {"ok" => true, :id => docid, :rev => new_rev})
-    else
-      je(404, 'not_found', "No doc with id: #{docid}")
+    begin
+      doc = db.get(docid)
+    rescue BoothError
+      db.put({"_id" => docid})
+      doc = db.get(docid)
+      rev = doc.rev
     end
+    att = {}
+    att["data"] = request.body.read
+    att["length"] = att["data"].length
+    att["content_type"] =  @env["CONTENT_TYPE"]
+    new_rev = doc.attachment_put(rev, att_name, att)
+    headers("Location" => ["",params[:db],docid,att_name].join('/'))
+    j(201, {"ok" => true, :id => docid, :rev => new_rev})
+  end
+end
+
+delete "/:db/:docid/*" do
+  docid = params[:docid]
+  rev = params[:rev]
+  att_name = params[:splat][0]
+  with_db(params[:db]) do |db|
+    doc = db.get(docid)
+    new_rev = doc.attachment_put(rev, att_name, nil)
+    # headers("Location" => ["",params[:db],docid,att_name].join('/'))
+    j(200, {"ok" => true, :id => docid, :rev => new_rev})
   end
 end

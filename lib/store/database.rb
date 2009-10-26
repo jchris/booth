@@ -49,9 +49,9 @@ class Database
   def get docid
     doc = @by_docid[docid]
     if !doc
-      raise BoothError.new(404, "not_found", "missing");
+      raise BoothError.new(404, "not_found", "missing doc '#{docid}'");
     elsif doc.deleted
-      raise BoothError.new(404, "not_found", "deleted");
+      raise BoothError.new(404, "not_found", "deleted doc '#{docid}'");
     else
       doc
     end

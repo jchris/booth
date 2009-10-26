@@ -50,7 +50,11 @@ class Document < Hash
       raise BoothError.new(409, "conflict", "attachment rev mismatch, need '#{self.rev}' for docid '#{self.id}'");
     end
     validate_att_name(name)
-    @attachments[name] = att
+    if att.nil?
+      @attachments.delete(name)
+    else
+      @attachments[name] = att
+    end
     pick_new_rev!
   end
   
@@ -63,7 +67,8 @@ class Document < Hash
         validate_att_name(name)
         @attachments[name] = process_attachment(@attachments[name], value)
       end
-    end    
+    end
+    self["_attachments"] = @attachments
   end
   
   def process_attachment(old_att, new_att)
@@ -73,6 +78,7 @@ class Document < Hash
       data = old_att["data"]
     end
     new_att["data"] = data
+    new_att["length"] = data.length
     new_att
   end
   
@@ -98,8 +104,7 @@ class Document < Hash
     self
   end
   def rev_string
-    uuid = UUID.new
-    uuid.generate
+    BOOTH_UUID.generate
   end
   def validate_keys!
     special_keys = %w{_id _rev _deleted _attachments}

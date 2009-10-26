@@ -37,6 +37,9 @@ class BoothError < StandardError
   end
 end
 
+BOOTH_UUID = UUID.new
+
+
 # TODO Help! I want code reloading during dev.
 
 set :public, File.join(filepath,"..","public")
@@ -50,6 +53,11 @@ end
 
 error(Sinatra::NotFound) do
   [404, {}, {"error"=>"not_found", "reason" => "missing handler"}.to_json]
+end
+
+error ::Exception do
+  be =  @env['sinatra.error']
+  [500,{}, {"error"=>"internal_error", "reason" => be.to_s}.to_json]
 end
 
 load 'global.rb'

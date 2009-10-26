@@ -52,9 +52,6 @@ couchTests.attachments= function(debug) {
   T(xhr.getResponseHeader("Content-Type") == "text/plain");
   T(xhr.getResponseHeader("Etag") == '"' + save_response.rev + '"');
 
-  binAttDocX = db.open("bin_doc2");
-  console.log(binAttDocX);
-
   // test RESTful attachment API
   var xhr = CouchDB.request("PUT", "/test_suite_db/bin_doc2/foo2.txt?rev=" + binAttDoc2._rev, {
     body:"This is no base64 encoded text",
@@ -129,10 +126,11 @@ couchTests.attachments= function(debug) {
   T(xhr.status == 404);
 
   // deleted attachment is still accessible with revision
-  var xhr = CouchDB.request("GET", "/test_suite_db/bin_doc3/attachment.txt?rev=" + rev);
-  T(xhr.status == 200);
-  T(xhr.responseText == bin_data);
-  T(xhr.getResponseHeader("Content-Type") == "text/plain;charset=utf-8");
+  // not supported by Booth
+  // var xhr = CouchDB.request("GET", "/test_suite_db/bin_doc3/attachment.txt?rev=" + rev);
+  // T(xhr.status == 200);
+  // T(xhr.responseText == bin_data);
+  // T(xhr.getResponseHeader("Content-Type") == "text/plain;charset=utf-8");
 
   // empty attachments
   var xhr = CouchDB.request("PUT", "/test_suite_db/bin_doc4/attachment.txt", {
@@ -153,9 +151,12 @@ couchTests.attachments= function(debug) {
   });
   T(xhr.status == 201);
 
+  db.info();
+  db.info();
+
   var xhr = CouchDB.request("GET", "/test_suite_db/bin_doc4/attachment.txt");
   T(xhr.status == 200);
-  T(xhr.responseText == "This is a string");
+  T(xhr.responseText == "This is a string", "race condition");
 
   // Attachment sparseness COUCHDB-220
 
