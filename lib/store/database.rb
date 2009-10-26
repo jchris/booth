@@ -38,6 +38,8 @@ class Database
       if doc.rev == old_doc.rev
         put_doc doc, old_doc
       else
+        puts "conflict"*3
+        puts old_doc.inspect
         raise BoothError.new(412, "conflict", "rev mismatch, need '#{old_doc.rev}'");
       end
     else
@@ -66,6 +68,7 @@ class Database
     doc.seq = @seq
     @by_seq[@seq] = doc.id
     @by_docid[doc.id] = doc
+    doc.pick_new_rev!
     doc.rev
   end
 end

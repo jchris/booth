@@ -44,15 +44,18 @@ couchTests.attachments= function(debug) {
       }
     }
   }
-
-  T(db.save(binAttDoc2).ok);
+  save_response = db.save(binAttDoc2)
+  T(save_response.ok);
 
   var xhr = CouchDB.request("GET", "/test_suite_db/bin_doc2/foo.txt");
   T(xhr.responseText.length == 0);
   T(xhr.getResponseHeader("Content-Type") == "text/plain");
+  T(xhr.getResponseHeader("Etag") == '"' + save_response.rev + '"');
 
-  // test RESTful doc API
+  binAttDocX = db.open("bin_doc2");
+  console.log(binAttDocX);
 
+  // test RESTful attachment API
   var xhr = CouchDB.request("PUT", "/test_suite_db/bin_doc2/foo2.txt?rev=" + binAttDoc2._rev, {
     body:"This is no base64 encoded text",
     headers:{"Content-Type": "text/plain;charset=utf-8"}
