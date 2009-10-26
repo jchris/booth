@@ -3,8 +3,14 @@ get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
     doc = db.get(docid)
+    etag(doc.etag)
     if doc
-      j(200, doc)
+      jdoc = if params[:attachments] == "true"
+        doc.with_attachments
+      else
+        doc.with_stubs
+      end
+      j(200, jdoc)
     else
       je(404, 'not_found', "No doc with id: #{docid}")
     end
@@ -58,20 +64,15 @@ end
 get "/:db/:docid/*" do
   docid = params[:docid]
   att_name = params[:splat][0]
-  puts "att_name"*4
-  puts att_name.inspect
   with_db(params[:db]) do |db|
     doc = db.get(docid)
-    if doc
-      att = doc.attachment(att_name)
-      headers({
-        "content-type" => att["content_type"],
-        "Etag" => doc.etag
-        })
-      att["data"]
-    else
-      je(404, 'not_found', "No doc with id: #{docid}")
-    end
+    etag(doc.rev)
+    att = doc.attachment(att_name)
+    headers({
+      "content-type" => att["content_type"],
+      "Etag" => doc.etag
+      })
+    att["data"]
   end
 end
 

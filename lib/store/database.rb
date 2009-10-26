@@ -35,7 +35,7 @@ class Database
   def put doc
     doc = Document.new(doc)
     if old_doc = @by_docid[doc.id]
-      if doc.rev == old_doc.rev
+      if old_doc.deleted || doc.rev == old_doc.rev
         put_doc doc, old_doc
       else
         puts "conflict"*3

@@ -58,7 +58,40 @@ class Document < Hash
     pick_new_rev!
   end
   
+  def with_attachments
+    self["_attachments"] = inline_attachments
+    self    
+  end
+  
+  def with_stubs
+    self["_attachments"] = attachment_stubs
+    self
+  end
+  
   private
+  
+  def inline_attachments
+    at = {}
+    @attachments.each do |name, value|
+      at[name] = {
+        "data" => Base64.encode64(value["data"]),
+        "length" => value["length"],
+        "content_type" => value["content_type"]
+      }
+    end
+    at
+  end
+  
+  def attachment_stubs 
+    at = {}
+    @attachments.each do |name, value|
+      at[name] = {
+        "length" => value["length"],
+        "content_type" => value["content_type"]
+      }
+    end
+    at
+  end
   
   def process_attachments!
     @attachments ||= {}
@@ -68,7 +101,6 @@ class Document < Hash
         @attachments[name] = process_attachment(@attachments[name], value)
       end
     end
-    self["_attachments"] = @attachments
   end
   
   def process_attachment(old_att, new_att)
