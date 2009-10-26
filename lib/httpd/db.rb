@@ -40,8 +40,16 @@ end
 
 post "/:db/_bulk_docs" do
   with_db(params[:db]) do |db|
-    docs = jbody
-    
+    docs = jbody["docs"]
+    uuid = UUID.new
+    results = docs.collect do |doc|
+      if !doc["_id"]
+        doc["_id"] = uuid.generate
+      end
+      rev = db.put(doc)
+      {"id" => doc["_id"], "rev" => rev}
+    end
+    j(200, results)
   end
 end
 
