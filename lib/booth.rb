@@ -45,6 +45,10 @@ error(BoothError) do
   [be.code, {}, be.to_json]
 end
 
+error(Sinatra::NotFound) do
+  [404, {}, {"error"=>"not_found"}.to_json]
+end
+
 load 'global.rb'
 load 'db.rb'
 load 'doc.rb'
