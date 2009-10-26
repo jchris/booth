@@ -54,6 +54,8 @@ couchTests.attachment_paths = function(debug) {
     T(xhr.status == 200);
     T(xhr.responseText == "We like percent two F.");
 
+    // var doc = db.open("bin_doc");
+    
     // require a _rev to PUT
     var xhr = CouchDB.request("PUT", "/"+dbName+"/bin_doc/foo/attachment.txt", {
       headers:{"Content-Type":"text/plain;charset=utf-8"},

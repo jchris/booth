@@ -40,7 +40,7 @@ class Database
       else
         puts "conflict"*3
         puts old_doc.inspect
-        raise BoothError.new(412, "conflict", "rev mismatch, need '#{old_doc.rev}'");
+        raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
       end
     else
       put_doc doc
@@ -67,8 +67,9 @@ class Database
     @seq += 1
     doc.seq = @seq
     @by_seq[@seq] = doc.id
-    @by_docid[doc.id] = doc
     doc.pick_new_rev!
+    puts "saving #{doc.id} with rev #{doc.rev}"
+    @by_docid[doc.id] = doc
     doc.rev
   end
 end

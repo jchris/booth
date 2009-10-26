@@ -41,12 +41,17 @@ class Document < Hash
     if @attachments[name]
       @attachments[name]
     else
-      raise BoothError.new(412, "not_found", "missing attachment: '#{name}'");
+      raise BoothError.new(404, "not_found", "missing attachment: '#{name}'");
     end
   end
   
-  def attachment_put name, att
+  def attachment_put user_rev, name, att
+    if self.rev != user_rev
+      raise BoothError.new(409, "conflict", "attachment rev mismatch, need '#{self.rev}' for docid '#{self.id}'");
+    end
+    validate_att_name(name)
     @attachments[name] = att
+    pick_new_rev!
   end
   
   private
@@ -55,6 +60,7 @@ class Document < Hash
     @attachments ||= {}
     if self["_attachments"] 
       self["_attachments"].each do |name, value|
+        validate_att_name(name)
         @attachments[name] = process_attachment(@attachments[name], value)
       end
     end    
@@ -70,6 +76,20 @@ class Document < Hash
     new_att
   end
   
+  def validate_att_name(name)
+    validate_unicode(name)
+    if (name[0] == "_")
+      raise BoothError.new(400, 'bad_request', "Attachment name can't start with '_'")
+    end
+  end
+  
+  def validate_unicode str, msg = "Invalid unicode"
+    begin
+      str.unpack 'U*'
+    rescue ArgumentError
+      raise BoothError.new(400, 'bad_request', msg)
+    end
+  end
   
   def update(other_hash)
     other_hash.each_pair do |key, value|

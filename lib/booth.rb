@@ -29,6 +29,9 @@ class BoothError < StandardError
   def to_json
     to_hash.to_json
   end
+  def to_s
+    to_json
+  end
   def to_hash
     {"error" => @error, "reason" => @reason}
   end
@@ -46,7 +49,7 @@ error(BoothError) do
 end
 
 error(Sinatra::NotFound) do
-  [404, {}, {"error"=>"not_found"}.to_json]
+  [404, {}, {"error"=>"not_found", "reason" => "missing handler"}.to_json]
 end
 
 load 'global.rb'

@@ -13,8 +13,17 @@ end
 
 get "/_uuids" do
   uuid = UUID.new
-  uuids = (1..10).collect{uuid.generate}
-  j(200, {"uuids" => uuids})
+  count = if params[:count]
+    params[:count].to_i
+  else
+    1
+  end
+  uuids = (1..count).collect{uuid.generate}
+  j(200, {"uuids" => uuids},{
+    "Cache-Control" => "no-cache",
+    "Pragma" => "no-cache",
+    "Etag" => uuid.generate
+  })
 end
 
 

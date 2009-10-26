@@ -56,12 +56,15 @@ delete "/:db/:docid/?" do
 end
 
 # attachment handling
-get "/:db/:docid/:att?" do
+get "/:db/:docid/*" do
   docid = params[:docid]
+  att_name = params[:splat][0]
+  puts "att_name"*4
+  puts att_name.inspect
   with_db(params[:db]) do |db|
     doc = db.get(docid)
     if doc
-      att = doc.attachment(params[:att])
+      att = doc.attachment(att_name)
       headers({
         "content-type" => att["content_type"],
         "Etag" => doc.etag
@@ -73,19 +76,18 @@ get "/:db/:docid/:att?" do
   end
 end
 
-put "/:db/:docid/:att?" do
+put "/:db/:docid/*" do
   docid = params[:docid]
   rev = params[:rev]
+  att_name = params[:splat][0]
   with_db(params[:db]) do |db|
     doc = db.get(docid)
     if doc
-      puts 'd'*40
-      puts doc.rev
       att = {}
       att["data"] = request.body.read
       att["content_type"] =  @env["CONTENT_TYPE"]
-      doc.attachment_put(params[:att], att)
-      new_rev = db.put(doc)
+      new_rev = doc.attachment_put(rev, att_name, att)
+      # new_rev = db.put(doc)
       headers("Location" => ["",params[:db],docid,params[:att]].join('/'))
       j(201, {"ok" => true, :id => docid, :rev => new_rev})
     else
