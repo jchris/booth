@@ -12,7 +12,7 @@ class Database
   def by_seq opts={}, &b
     @by_seq.fold(opts) do |seq, docid|
       if (docid)
-        b.call(seq, @by_docid[docid])
+        b.call(seq, get_doc(docid))
       end
     end
   end
@@ -32,22 +32,33 @@ class Database
     @doc_count -= 1
     new_rev
   end
-  def put doc
+  def put doc, bulk = false, params = {}
     doc = Document.new(doc)
-    if old_doc = @by_docid[doc.id]
+    if old_doc = get_doc(doc.id)
       if old_doc.deleted || doc.rev == old_doc.rev
         put_doc doc, old_doc
       else
-        puts "conflict"*3
-        puts old_doc.inspect
-        raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
+        if bulk
+          if params[:all_or_nothing] == "true"
+            # write a conflict
+            put_doc doc, :conflict
+          else
+            # skip conflicts
+            {
+              "id" => doc.id,
+              "error" => "conflict"              
+            }
+          end
+        else
+          raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
+        end
       end
     else
       put_doc doc
     end
   end
   def get docid
-    doc = @by_docid[docid]
+    doc = get_doc(docid)
     if !doc
       raise BoothError.new(404, "not_found", "missing doc '#{docid}'");
     elsif doc.deleted
@@ -70,6 +81,12 @@ class Database
     doc.pick_new_rev!
     puts "saving #{doc.id} with rev #{doc.rev}"
     @by_docid[doc.id] = doc
-    doc.rev
+    {
+      "rev" => doc.rev,
+      "id" => doc.id
+    }
+  end
+  def get_doc docid
+    @by_docid[docid]
   end
 end

@@ -45,8 +45,7 @@ post "/:db/_bulk_docs" do
       if !doc["_id"]
         doc["_id"] = BOOTH_UUID.generate
       end
-      rev = db.put(doc)
-      {"id" => doc["_id"], "rev" => rev}
+      db.put(doc, params)
     end
     j(200, results)
   end

@@ -23,10 +23,9 @@ post "/:db/?" do
     if !doc["_id"]
       doc["_id"] = BOOTH_UUID.generate
     end
-    rev = db.put(doc)
-    j(201, {"ok" => true,
-      :id => doc["_id"],
-      :rev => rev},{
+    resp = db.put(doc)
+    resp["ok"] = true
+    j(201, resp, {
         "Location" => ["",params[:db],doc["_id"]].join('/')
       })
   end
@@ -37,10 +36,9 @@ put "/:db/:docid/?" do
   with_db(params[:db]) do |db|
     doc = jbody("Document must be a JSON object")
     doc["_id"] = docid
-    rev = db.put(doc)
-    j(201, {"ok" => true,
-      :id => docid,
-      :rev => rev},{
+    resp = db.put(doc)
+    resp["ok"] = true
+    j(201, resp, {
         "Location" => ["",params[:db],docid].join('/')
       })
   end
