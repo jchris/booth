@@ -33,7 +33,8 @@ loadTest("attachments.js");
 loadTest("attachment_names.js");
 loadTest("attachment_paths.js");
 loadTest("attachment_views.js");
-loadTest("batch_save.js");
+// not a booth feature
+// loadTest("batch_save.js");
 loadTest("bulk_docs.js");
 loadTest("changes.js");
 loadTest("compact.js");

@@ -38,7 +38,7 @@ couchTests.attachment_paths = function(debug) {
     T(db.save(binAttDoc).ok);
 
     var xhr = CouchDB.request("GET", "/"+dbName+"/bin_doc/foo/bar.txt");
-    T(xhr.responseText == "This is a base64 encoded text");
+    T(xhr.responseText == "This is a base64 encoded text", "1");
     T(xhr.getResponseHeader("Content-Type") == "text/plain");
 
     // lets try it with an escaped attachment id...
@@ -99,18 +99,18 @@ couchTests.attachment_paths = function(debug) {
     T(db.save(binAttDoc).ok);
 
     var xhr = CouchDB.request("GET", "/"+dbName+"/_design%2Fbin_doc/foo/bar.txt");
-    T(xhr.responseText == "This is a base64 encoded text");
+    T(xhr.responseText == "This is a base64 encoded text", "ddoc");
     T(xhr.getResponseHeader("Content-Type") == "text/plain");
 
     // lets try it with an escaped attachment id...
     // weird that it's at two urls
     var xhr = CouchDB.request("GET", "/"+dbName+"/_design%2Fbin_doc/foo%2Fbar.txt");
-    T(xhr.responseText == "This is a base64 encoded text");
+    T(xhr.responseText == "This is a base64 encoded text","ddoc escaped");
     T(xhr.status == 200);
 
     // err, 3 urls
     var xhr = CouchDB.request("GET", "/"+dbName+"/_design/bin_doc/foo%2Fbar.txt");
-    T(xhr.responseText == "This is a base64 encoded text");
+    T(xhr.responseText == "This is a base64 encoded text","ddoc noscape");
     T(xhr.status == 200);
 
     // I mean um, 4 urls

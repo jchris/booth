@@ -59,9 +59,21 @@ delete "/:db/:docid/?" do
 end
 
 # attachment handling
+
+def docid_att_name(params)
+  if params[:docid] == "_design"
+    ps = params[:splat][0].split('/')
+    ["_design/#{ps.shift}", ps.join('/')]
+  else
+    [params[:docid], params[:splat][0]]    
+  end
+end
+
+
 get "/:db/:docid/*" do
-  docid = params[:docid]
-  att_name = params[:splat][0]
+  docid, att_name = docid_att_name(params)
+  # docid = params[:docid]
+  # att_name = params[:splat][0]
   with_db(params[:db]) do |db|
     doc = db.get(docid)
     etag(doc.rev)
