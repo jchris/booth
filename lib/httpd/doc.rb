@@ -2,7 +2,7 @@
 get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
-    doc = db.get(docid)
+    doc = db.get(docid, params)
     etag(doc.etag)
     if doc
       jdoc = if params[:attachments] == "true"

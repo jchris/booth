@@ -17,7 +17,8 @@ class Database
     end
   end
   def all_docs opts={}, &b
-    @by_docid.fold(opts) do |docid, doc|
+    @by_docid.fold(opts) do |docid, heads|
+      doc = heads[0]
       next if doc.deleted
       b.call(docid, doc)
     end
@@ -41,7 +42,7 @@ class Database
         if bulk
           if params[:all_or_nothing] == "true"
             # write a conflict
-            put_doc doc, :conflict
+            put_doc doc, old_doc, :conflict
           else
             # skip conflicts
             {
@@ -54,11 +55,11 @@ class Database
         end
       end
     else
-      put_doc doc
+      put_doc doc, nil
     end
   end
-  def get docid
-    doc = get_doc(docid)
+  def get docid, params={}
+    doc = get_doc(docid, params)
     if !doc
       raise BoothError.new(404, "not_found", "missing doc '#{docid}'");
     elsif doc.deleted
@@ -68,10 +69,10 @@ class Database
     end
   end
   private
-  def put_doc doc, old=nil
+  def put_doc doc, old, conflict=false
     # clear old seq
     if old
-      @by_seq[old.seq] = nil
+      @by_seq[old.seq] = nil unless conflict
     else
       @doc_count += 1
     end
@@ -80,13 +81,27 @@ class Database
     @by_seq[@seq] = doc.id
     doc.pick_new_rev!
     puts "saving #{doc.id} with rev #{doc.rev}"
-    @by_docid[doc.id] = doc
+    if conflict
+      heads = @by_docid[doc.id]
+      heads.push(doc)
+      @by_docid[doc.id] = heads      
+    else
+      @by_docid[doc.id] = [doc]
+    end
     {
       "rev" => doc.rev,
       "id" => doc.id
     }
   end
-  def get_doc docid
-    @by_docid[docid]
+  def get_doc docid, params={}
+    heads = @by_docid[docid]
+    if heads
+      if params[:conflicts] == true
+        doc = heads.shift
+        doc["_conflicts"] = heads
+      else
+        heads[0]
+      end
+    end
   end
 end
