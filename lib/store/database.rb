@@ -34,7 +34,7 @@ class Database
     new_rev
   end
   def put doc, bulk = false, params = {}
-    doc = Document.new(doc)
+    doc = Document.new(self, doc)
     if old_doc = get_doc(doc.id)
       if old_doc.deleted || doc.rev == old_doc.rev
         put_doc doc, old_doc

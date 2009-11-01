@@ -13,10 +13,11 @@ describe "Database" do
     d.id.should == "foo"
     d["bam"].should == "baz"
   end
-  it "should apply revs" do
-    d = @db.get("foo")
-    d.rev.should_not be_empty
-  end
+  # move rev handling to doc spec
+  # it "should apply revs" do
+  #   d = @db.get("foo")
+  #   d.rev.should_not be_empty
+  # end
   it "should apply a sequence" do
     @db.put({
       "_id" => "bar",
@@ -28,28 +29,28 @@ describe "Database" do
     d2.seq.should == 2
     @db.seq.should == 2
   end
-  it "should fail updates with a bad rev" do
-    lambda {
-      @db.put({
-        "_id" => "foo",
-        "_rev" => "555",
-        "bam" => "duck"
-      })      
-    }.should raise_error
-  end
-  it "should allow updates with a good rev" do
-    d = @db.get("foo")
-    d["bam"].should == "baz"
-    new_rev = @db.put({
-      "_id" => "foo",
-      "_rev" => d.rev,
-      "bam" => "duck"
-    })
-    dx = @db.get("foo")
-    dx.rev.should == new_rev
-    new_rev.should != d.rev 
-    dx["bam"].should == "duck"
-  end
+  # it "should fail updates with a bad rev" do
+  #   lambda {
+  #     @db.put({
+  #       "_id" => "foo",
+  #       "_rev" => "555",
+  #       "bam" => "duck"
+  #     })      
+  #   }.should raise_error
+  # end
+  # it "should allow updates with a good rev" do
+  #   d = @db.get("foo")
+  #   d["bam"].should == "baz"
+  #   new_rev = @db.put({
+  #     "_id" => "foo",
+  #     "_rev" => d.rev,
+  #     "bam" => "duck"
+  #   })
+  #   dx = @db.get("foo")
+  #   dx.rev.should == new_rev
+  #   new_rev.should != d.rev 
+  #   dx["bam"].should == "duck"
+  # end
   describe "seq" do
     before(:each) do
       @db.put({

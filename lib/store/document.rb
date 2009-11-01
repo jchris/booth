@@ -1,37 +1,56 @@
 require 'base64'
-class Document < Hash
+class Document
   
   attr_accessor :seq
-  def initialize(c = {})
-    if c.is_a?(Hash)
-      jrev = c.delete("_rev")
-      super()
-      update(c)
-    else
-      super(c)
+  attr_reader :id
+  attr_reader :rev
+  attr_reader :body
+  
+  def update jdoc
+    # check id
+    if !jdoc["_id"] || (jdoc["_id"] != @id)
+      raise BoothError.new(400, "bad_request", "id mismatch, doc._id must match #{@id}")
     end
-    if jrev
-      self["_rev"] = jrev
+    # check rev
+    if @rev
+      if !jdoc["_rev"] || (jdoc["_rev"] != @rev)
+        raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'");
+      end
+      @rev = uuid()
     else
-      pick_new_rev!
+      # new doc
+      @rev = jdoc["_rev"] || uuid()
     end
-    validate_keys!
-    process_attachments!
+    @body = jdoc
+    # callback the db for the seq
   end
   
-  def pick_new_rev!
-    self["_rev"] = rev_string()
+  # called only once when the key is allocated
+  # could be with a rev (replication) or w/o (put)
+  # requires an _id
+  def initialize(db, jdoc)
+    @db = db
+    @id = jdoc["_id"]
+    raise "Document requires an _id" unless @id
+    update(jdoc)
+    # if c.is_a?(Hash)
+    #   jrev = c.delete("_rev")
+    #   super()
+    #   merge(c)
+    # else
+    #   super(c)
+    # end
+    # if jrev
+    #   self["_rev"] = jrev
+    # else
+    #   pick_new_rev!
+    # end
+    # validate_keys!
+    # process_attachments!
   end
   
-  def id
-    self["_id"]
-  end
-  
-  def rev
-    self["_rev"]
-  end
   def etag
-    "\"#{self["_rev"]}\""
+    "\"#{@rev}\""
   end
   def deleted
     self["_deleted"]
@@ -129,13 +148,13 @@ class Document < Hash
     end
   end
   
-  def update(other_hash)
+  def merge(other_hash)
     other_hash.each_pair do |key, value|
       self[key] = value
     end
     self
   end
-  def rev_string
+  def uuid
     BOOTH_UUID.generate
   end
   def validate_keys!
