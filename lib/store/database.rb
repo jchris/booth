@@ -10,9 +10,9 @@ class Database
     @doc_count = 0
   end
   def by_seq opts={}, &b
-    @by_seq.fold(opts) do |seq, docid|
-      if (docid)
-        b.call(seq, get_doc(docid))
+    @by_seq.fold(opts) do |seq, info|
+      if (info)
+        b.call(seq, get_doc(info[:id], info[:rev]))
       end
     end
   end
@@ -33,7 +33,27 @@ class Database
     @doc_count -= 1
     new_rev
   end
-  def put doc, bulk = false, params = {}
+  
+  def put jdoc, params = {}
+    doc = get_doc(jdoc["_id"])
+    if doc
+      r = doc.update(jdoc, params)
+      if r[:old_seq]
+        @by_seq[r[:old_seq]] = nil
+      end
+      @seq += 1
+      doc.seq = @seq
+      @by_seq[@seq] = r[:info]
+    else
+      doc = Document.new(self, jdoc)
+      @seq += 1
+      doc.seq = @seq
+      @by_docid[doc.id] = doc
+      @by_seq[@seq] = {:id => doc.id, :rev => doc.rev}
+    end
+  end
+  
+  def putx doc, bulk = false, params = {}
     doc = Document.new(self, doc)
     if old_doc = get_doc(doc.id)
       if old_doc.deleted || doc.rev == old_doc.rev
@@ -94,14 +114,6 @@ class Database
     }
   end
   def get_doc docid, params={}
-    heads = @by_docid[docid]
-    if heads
-      if params[:conflicts] == true
-        doc = heads.shift
-        doc["_conflicts"] = heads
-      else
-        heads[0]
-      end
-    end
+    @by_docid[docid]
   end
 end

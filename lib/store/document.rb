@@ -4,9 +4,10 @@ class Document
   attr_accessor :seq
   attr_reader :id
   attr_reader :rev
+  attr_reader :deleted
   attr_reader :body
   
-  def update jdoc
+  def update jdoc, params={}
     # check id
     if !jdoc["_id"] || (jdoc["_id"] != @id)
       raise BoothError.new(400, "bad_request", "id mismatch, doc._id must match #{@id}")
@@ -21,8 +22,17 @@ class Document
       # new doc
       @rev = jdoc["_rev"] || uuid()
     end
+    @deleted = true if jdoc["_deleted"]
     @body = jdoc
     # callback the db for the seq
+    r = {
+      :info => {
+        :id => @id,
+        :rev => @rev
+      }
+    }
+    r[:old_seq] = @seq if @seq
+    r
   end
   
   # called only once when the key is allocated
@@ -51,9 +61,6 @@ class Document
   
   def etag
     "\"#{@rev}\""
-  end
-  def deleted
-    self["_deleted"]
   end
   
   def attachment(name)

@@ -11,7 +11,7 @@ describe "Database" do
   it "should accept docs" do
     d = @db.get("foo")
     d.id.should == "foo"
-    d["bam"].should == "baz"
+    d.body["bam"].should == "baz"
   end
   # move rev handling to doc spec
   # it "should apply revs" do
