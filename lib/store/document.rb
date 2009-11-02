@@ -40,7 +40,7 @@ class Document
     end
     validate_keys(jdoc)
     
-    @rev = @rev ? uuid() : (jdoc["_rev"] || uuid())
+    @rev = @rev ? new_rev() : (jdoc["_rev"] || new_rev())
     @deleted = true if jdoc["_deleted"]
     @body = jdoc
     process_attachments!
@@ -77,7 +77,7 @@ class Document
     else
       @attachments[name] = att
     end
-    pick_new_rev!
+    @rev = new_rev()
   end
 
   
@@ -143,11 +143,8 @@ class Document
     end
   end
   
-  def merge(other_hash)
-    other_hash.each_pair do |key, value|
-      self[key] = value
-    end
-    self
+  def new_rev
+    uuid()
   end
   def uuid
     BOOTH_UUID.generate
