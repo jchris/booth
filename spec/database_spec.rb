@@ -8,6 +8,9 @@ describe "Database" do
       "bam" => "baz"
     })
   end
+  it "should count docs" do
+    @db.count.should == "x"
+  end
   it "should accept docs" do
     d = @db.get("foo")
     d.id.should == "foo"

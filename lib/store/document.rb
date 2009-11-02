@@ -7,11 +7,29 @@ class Document
   attr_reader :deleted
   attr_reader :body
   
+  def to_json
+    @body["_rev"] = @rev
+    @body["_id"] = @id
+    @body.to_json
+  end
+  
+  def with_attachments
+    @body["_attachments"] = inline_attachments
+    @body    
+  end
+  
+  def with_stubs
+    @body["_attachments"] = attachment_stubs
+    @body
+  end
+  
   def update jdoc, params={}
+    validate_keys(jdoc)
     # check id
     if !jdoc["_id"] || (jdoc["_id"] != @id)
       raise BoothError.new(400, "bad_request", "id mismatch, doc._id must match #{@id}")
     end
+    
     # check rev
     if @rev
       if !jdoc["_rev"] || (jdoc["_rev"] != @rev)
@@ -22,9 +40,10 @@ class Document
       # new doc
       @rev = jdoc["_rev"] || uuid()
     end
+    
     @deleted = true if jdoc["_deleted"]
     @body = jdoc
-    # callback the db for the seq
+    process_attachments!
     r = {
       :info => {
         :id => @id,
@@ -32,6 +51,7 @@ class Document
       }
     }
     r[:old_seq] = @seq if @seq
+    # callback the db for the seq?
     r
   end
   
@@ -83,16 +103,7 @@ class Document
     end
     pick_new_rev!
   end
-  
-  def with_attachments
-    self["_attachments"] = inline_attachments
-    self    
-  end
-  
-  def with_stubs
-    self["_attachments"] = attachment_stubs
-    self
-  end
+
   
   private
   
@@ -121,12 +132,13 @@ class Document
   
   def process_attachments!
     @attachments ||= {}
-    if self["_attachments"] 
-      self["_attachments"].each do |name, value|
+    if @body["_attachments"] 
+      @body["_attachments"].each do |name, value|
         validate_att_name(name)
         @attachments[name] = process_attachment(@attachments[name], value)
       end
     end
+    @body.delete("_attachments")
   end
   
   def process_attachment(old_att, new_att)
@@ -164,9 +176,9 @@ class Document
   def uuid
     BOOTH_UUID.generate
   end
-  def validate_keys!
+  def validate_keys jdoc
     special_keys = %w{_id _rev _deleted _attachments}
-    self.each do |k,v|
+    jdoc.each do |k,v|
       if k[0] == "_"
         raise BoothError.new(500, "doc_validation", "bad special field '#{k}'") unless special_keys.include?(k)
       end

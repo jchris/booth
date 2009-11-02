@@ -47,6 +47,7 @@ class Database
     else
       doc = Document.new(self, jdoc)
       @seq += 1
+      @doc_count += 1
       doc.seq = @seq
       @by_docid[doc.id] = doc
       @by_seq[@seq] = {:id => doc.id, :rev => doc.rev}
