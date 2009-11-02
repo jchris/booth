@@ -9,7 +9,7 @@ describe "Database" do
     })
   end
   it "should count docs" do
-    @db.count.should == "x"
+    @db.doc_count.should == 1
   end
   it "should accept docs" do
     d = @db.get("foo")
