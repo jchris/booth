@@ -26,7 +26,7 @@ def buildView(db, map, red)
     db.by_seq(:startkey => 0) do |seq, doc|
       # puts "map"
       # puts doc.inspect
-      fun_rows = qs.run(["map_doc", doc])[0]
+      fun_rows = qs.run(["map_doc", doc.jh])[0]
       fun_rows.each do |r|
         next unless r
         key = r[0]

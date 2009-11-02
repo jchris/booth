@@ -23,6 +23,7 @@ class Database
       b.call(docid, doc)
     end
   end
+  
   def delete docid, rev
     doc = {
       "_id" => docid,
@@ -37,6 +38,7 @@ class Database
   def put jdoc, params = {}
     doc = get_doc(jdoc["_id"])
     if doc
+      puts "stored doc.rev #{doc.rev}"
       r = doc.update(jdoc, params)
       if r[:old_seq]
         @by_seq[r[:old_seq]] = nil
@@ -54,31 +56,32 @@ class Database
     end
   end
   
-  def putx doc, bulk = false, params = {}
-    doc = Document.new(self, doc)
-    if old_doc = get_doc(doc.id)
-      if old_doc.deleted || doc.rev == old_doc.rev
-        put_doc doc, old_doc
-      else
-        if bulk
-          if params[:all_or_nothing] == "true"
-            # write a conflict
-            put_doc doc, old_doc, :conflict
-          else
-            # skip conflicts
-            {
-              "id" => doc.id,
-              "error" => "conflict"              
-            }
-          end
-        else
-          raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
-        end
-      end
-    else
-      put_doc doc, nil
-    end
-  end
+  # def putx doc, bulk = false, params = {}
+  #   doc = Document.new(self, doc)
+  #   if old_doc = get_doc(doc.id)
+  #     if old_doc.deleted || doc.rev == old_doc.rev
+  #       put_doc doc, old_doc
+  #     else
+  #       if bulk
+  #         if params[:all_or_nothing] == "true"
+  #           # write a conflict
+  #           put_doc doc, old_doc, :conflict
+  #         else
+  #           # skip conflicts
+  #           {
+  #             "id" => doc.id,
+  #             "error" => "conflict"              
+  #           }
+  #         end
+  #       else
+  #         raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
+  #       end
+  #     end
+  #   else
+  #     put_doc doc, nil
+  #   end
+  # end
+
   def get docid, params={}
     doc = get_doc(docid, params)
     if !doc
@@ -89,31 +92,9 @@ class Database
       doc
     end
   end
+  
   private
-  def put_doc doc, old, conflict=false
-    # clear old seq
-    if old
-      @by_seq[old.seq] = nil unless conflict
-    else
-      @doc_count += 1
-    end
-    @seq += 1
-    doc.seq = @seq
-    @by_seq[@seq] = doc.id
-    doc.pick_new_rev!
-    puts "saving #{doc.id} with rev #{doc.rev}"
-    if conflict
-      heads = @by_docid[doc.id]
-      heads.push(doc)
-      @by_docid[doc.id] = heads      
-    else
-      @by_docid[doc.id] = [doc]
-    end
-    {
-      "rev" => doc.rev,
-      "id" => doc.id
-    }
-  end
+
   def get_doc docid, params={}
     @by_docid[docid]
   end

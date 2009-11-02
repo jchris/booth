@@ -3,14 +3,9 @@ get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
     doc = db.get(docid, params)
-    etag(doc.etag)
+    # etag(doc.etag)
     if doc
-      jdoc = if params[:attachments] == "true"
-        doc.with_attachments
-      else
-        doc.with_stubs
-      end
-      j(200, jdoc)
+      j(200, doc.jh(params))
     else
       je(404, 'not_found', "No doc with id: #{docid}")
     end

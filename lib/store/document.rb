@@ -6,41 +6,41 @@ class Document
   attr_reader :rev
   attr_reader :deleted
   attr_reader :body
-  
-  def to_json
+
+  # called only once when the key is allocated
+  # could be with a rev (replication) or w/o (put)
+  # requires an _id
+  def initialize(db, jdoc)
+    @db = db
+    @id = jdoc["_id"]
+    raise "Document requires an _id" unless @id
+    update(jdoc)
+  end
+    
+  def jh(params={})
     @body["_rev"] = @rev
     @body["_id"] = @id
-    @body.to_json
-  end
-  
-  def with_attachments
-    @body["_attachments"] = inline_attachments
-    @body    
-  end
-  
-  def with_stubs
-    @body["_attachments"] = attachment_stubs
+    if params[:attachments] == "true"
+      @body["_attachments"] = inline_attachments 
+    elsif @attachments
+      @body["_attachments"] = attachment_stubs
+    end
     @body
   end
   
   def update jdoc, params={}
-    validate_keys(jdoc)
     # check id
     if !jdoc["_id"] || (jdoc["_id"] != @id)
       raise BoothError.new(400, "bad_request", "id mismatch, doc._id must match #{@id}")
     end
     
     # check rev
-    if @rev
-      if !jdoc["_rev"] || (jdoc["_rev"] != @rev)
+    if @rev && jdoc["_rev"] != @rev
         raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'");
-      end
-      @rev = uuid()
-    else
-      # new doc
-      @rev = jdoc["_rev"] || uuid()
     end
+    validate_keys(jdoc)
     
+    @rev = @rev ? uuid() : (jdoc["_rev"] || uuid())
     @deleted = true if jdoc["_deleted"]
     @body = jdoc
     process_attachments!
@@ -53,30 +53,6 @@ class Document
     r[:old_seq] = @seq if @seq
     # callback the db for the seq?
     r
-  end
-  
-  # called only once when the key is allocated
-  # could be with a rev (replication) or w/o (put)
-  # requires an _id
-  def initialize(db, jdoc)
-    @db = db
-    @id = jdoc["_id"]
-    raise "Document requires an _id" unless @id
-    update(jdoc)
-    # if c.is_a?(Hash)
-    #   jrev = c.delete("_rev")
-    #   super()
-    #   merge(c)
-    # else
-    #   super(c)
-    # end
-    # if jrev
-    #   self["_rev"] = jrev
-    # else
-    #   pick_new_rev!
-    # end
-    # validate_keys!
-    # process_attachments!
   end
   
   def etag

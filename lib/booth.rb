@@ -45,6 +45,7 @@ BOOTH_UUID = UUID.new
 set :public, File.join(filepath,"..","public")
 set :show_exceptions, false
 set :raise_errors, false
+set :lock, false
 
 error(BoothError) do
   be =  @env['sinatra.error']
