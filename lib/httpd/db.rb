@@ -45,7 +45,11 @@ post "/:db/_bulk_docs" do
       if !doc["_id"]
         doc["_id"] = BOOTH_UUID.generate
       end
-      db.put(doc, params)
+      begin
+        db.put(doc, params)
+      rescue BoothError => e
+        e
+      end
     end
     j(200, results)
   end
