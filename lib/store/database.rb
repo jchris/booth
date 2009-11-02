@@ -17,8 +17,7 @@ class Database
     end
   end
   def all_docs opts={}, &b
-    @by_docid.fold(opts) do |docid, heads|
-      doc = heads[0]
+    @by_docid.fold(opts) do |docid, doc|
       next if doc.deleted
       b.call(docid, doc)
     end
