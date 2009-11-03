@@ -10,8 +10,7 @@ class Document
   # called only once when the key is allocated
   # could be with a rev (replication) or w/o (put)
   # requires an _id
-  def initialize(db, jdoc)
-    @db = db
+  def initialize(jdoc)
     @id = jdoc["_id"]
     raise "Document requires an _id" unless @id
     update(jdoc)

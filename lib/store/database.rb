@@ -46,7 +46,7 @@ class Database
       doc.seq = @seq
       @by_seq[@seq] = r[:info]
     else
-      doc = Document.new(self, jdoc)
+      doc = Document.new(jdoc)
       @seq += 1
       @doc_count += 1
       doc.seq = @seq

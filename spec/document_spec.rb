@@ -2,8 +2,7 @@ require File.join(File.expand_path(File.dirname(__FILE__)),"spec_helper");
 
 describe "Doc" do
   before(:each) do
-    @db = Database.new
-    @d = Document.new(@db, {
+    @d = Document.new({
       "_id" => "awesome",
       "foo" => "bar"
     })
