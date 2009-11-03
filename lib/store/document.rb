@@ -36,7 +36,7 @@ class Document
     
     # check rev
     if @rev && jdoc["_rev"] != @rev
-        raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'");
+        raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'", {:id => @id});
     end
     validate_keys(jdoc)
     

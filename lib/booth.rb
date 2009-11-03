@@ -21,10 +21,11 @@ Booth ||= {}
 
 class BoothError < StandardError
   attr_reader :code
-  def initialize code, error, reason
+  def initialize code, error, reason, jh = {}
     @code = code
     @error = error
     @reason = reason
+    @jh = jh
   end
   def to_json
     to_hash.to_json
@@ -33,7 +34,7 @@ class BoothError < StandardError
     to_json
   end
   def to_hash
-    {"error" => @error, "reason" => @reason}
+    @jh.merge({"error" => @error, "reason" => @reason})
   end
 end
 
