@@ -1,7 +1,7 @@
 require File.join(File.expand_path(File.dirname(__FILE__)),"spec_helper");
 
 describe "Doc" do
-  before(:all) do
+  before(:each) do
     @db = Database.new
     @d = Document.new(@db, {
       "_id" => "awesome",
@@ -18,7 +18,7 @@ describe "Doc" do
     @d.body["foo"].should == "bar"    
   end
   describe "updating it with a matching rev" do
-    before(:all) do
+    before(:each) do
       @r = @d.rev
       @d.update({
         "_id" => "awesome",
@@ -32,5 +32,23 @@ describe "Doc" do
     it "should update fields" do
       @d.body["foo"].should == "box"    
     end
+  end
+  describe "updating it with a conflict" do
+    before(:each) do
+      @r = @d.rev
+      @d.update({
+        "_id" => "awesome",
+        "_rev" => @r,
+        "foo" => "conflict"
+      },{
+        :all_or_nothing => "true"
+      })
+    end
+    it "should have conflicts" do
+      @d.conflicts.length.should == 1
+    end
+  end
+  it "should have no conflicts" do
+    @d.conflicts.should == []
   end
 end

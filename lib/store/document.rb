@@ -18,14 +18,18 @@ class Document
   end
     
   def jh(params={})
-    @body["_rev"] = @rev
-    @body["_id"] = @id
+    doc = {}
+    doc["_rev"] = @rev
+    doc["_id"] = @id
     if params[:attachments] == "true"
-      @body["_attachments"] = inline_attachments 
+      doc["_attachments"] = inline_attachments 
     elsif @attachments
-      @body["_attachments"] = attachment_stubs
+      doc["_attachments"] = attachment_stubs
     end
-    @body
+    if params[:conflicts] == "true"
+      doc["_conflicts"] = conflict_revs
+    end
+    @body.merge(doc)
   end
   
   def update jdoc, params={}
@@ -36,7 +40,11 @@ class Document
     
     # check rev
     if @rev && jdoc["_rev"] != @rev
+      if params[:all_or_nothing] == "true"
+        return write_conflict(jdoc, params)
+      else
         raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'", {:id => @id});
+      end
     end
     validate_keys(jdoc)
     
@@ -57,6 +65,10 @@ class Document
   
   def etag
     "\"#{@rev}\""
+  end
+  
+  def conflicts
+    []
   end
   
   def attachment(name)
@@ -82,6 +94,11 @@ class Document
 
   
   private
+  
+  # provide a list of the revs of the current heads
+  def conflict_revs
+    
+  end
   
   def inline_attachments
     at = {}
