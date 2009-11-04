@@ -40,7 +40,9 @@ end
 
 post "/:db/_bulk_docs" do
   with_db(params[:db]) do |db|
-    docs = jbody["docs"]
+    j = jbody
+    docs = j["docs"]
+    params[:all_or_nothing] = "true" if j["all_or_nothing"]
     results = docs.collect do |doc|
       if !doc["_id"]
         doc["_id"] = BOOTH_UUID.generate

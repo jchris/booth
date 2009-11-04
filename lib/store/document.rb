@@ -6,6 +6,7 @@ class Document
   attr_reader :rev
   attr_reader :deleted
   attr_reader :body
+  attr_reader :conflicts
 
   # called only once when the key is allocated
   # could be with a rev (replication) or w/o (put)
@@ -13,22 +14,27 @@ class Document
   def initialize(jdoc)
     @id = jdoc["_id"]
     raise "Document requires an _id" unless @id
+    @conflicts = []
     update(jdoc)
   end
     
   def jh(params={})
-    doc = {}
-    doc["_rev"] = @rev
-    doc["_id"] = @id
-    if params[:attachments] == "true"
-      doc["_attachments"] = inline_attachments 
-    elsif @attachments
-      doc["_attachments"] = attachment_stubs
+    if params[:rev] && params[:rev] != @rev
+      find_rev(params[:rev]).jh(params)
+    else
+      doc = {}
+      doc["_rev"] = @rev
+      doc["_id"] = @id
+      if params[:attachments] == "true"
+        doc["_attachments"] = inline_attachments 
+      elsif @attachments
+        doc["_attachments"] = attachment_stubs
+      end
+      if params[:conflicts] == "true"
+        doc["_conflicts"] = conflict_revs
+      end
+      @body.merge(doc)
     end
-    if params[:conflicts] == "true"
-      doc["_conflicts"] = conflict_revs
-    end
-    @body.merge(doc)
   end
   
   def update jdoc, params={}
@@ -40,7 +46,7 @@ class Document
     # check rev
     if @rev && jdoc["_rev"] != @rev
       if params[:all_or_nothing] == "true"
-        return write_conflict(jdoc, params)
+        return write_conflict(jdoc)
       else
         raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'", {:id => @id});
       end
@@ -96,7 +102,7 @@ class Document
   
   # provide a list of the revs of the current heads
   def conflict_revs
-    
+    @conflicts.collect{|c|c.rev}
   end
   
   def inline_attachments
@@ -173,4 +179,17 @@ class Document
       end
     end
   end
+  
+  def write_conflict(jdoc)
+    # first attempt to update an existing confict?
+    # just create a new conflict
+    doc = Document.new(jdoc)
+    @conflicts << doc
+    {:info => {:id => doc.id, :rev => doc.rev}}
+  end
+  
+  def find_rev r
+    @conflicts.find{|c|c.rev == r}
+  end
+  
 end

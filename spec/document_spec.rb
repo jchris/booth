@@ -37,14 +37,19 @@ describe "Doc" do
       @r = @d.rev
       @d.update({
         "_id" => "awesome",
-        "_rev" => @r,
+        "_rev" => "@r",
         "foo" => "conflict"
       },{
         :all_or_nothing => "true"
       })
+      @cfts = @d.jh(:conflicts => "true")["_conflicts"]
     end
-    it "should have conflicts" do
-      @d.conflicts.length.should == 1
+    it "should have conflict_revs" do
+      @cfts.length.should == 1
+    end
+    it "should load conflict revs" do
+      @d.jh({:rev => @cfts[0]})["_rev"].should == @cfts[0]
+      @d.jh["_rev"].should_not == @cfts[0]
     end
   end
   it "should have no conflicts" do
