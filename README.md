@@ -36,6 +36,13 @@ A: It's named after [Special Agent Seeley Booth](http://en.wikipedia.org/wiki/Se
 
 ## Get Started
 
+Install the following gems, if you haven't:
+
+    gem install json
+    gem install sinatra
+    gem install uuid
+    gem install cgi
+
 Booth is just a Sinatra server, so to start it, run:
 
     ruby lib/booth.rb
