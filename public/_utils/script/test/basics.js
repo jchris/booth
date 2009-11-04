@@ -81,6 +81,7 @@ couchTests.basics = function(debug) {
 
   // Check the database doc count
   T(db.info().doc_count == 4);
+  T(db.info().db_name == "test_suite_db");
 
   T(db.open("3").a == 4);
 
