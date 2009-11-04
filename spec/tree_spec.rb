@@ -41,7 +41,7 @@ describe "Tree" do
     a[1].should == "d"
     a[2].should be_nil
   end
-  it "should do a keyscan from a startkey to and endkey" do
+  it "should do a keyscan from startkey to endkey" do
     a = [];
     @t["Z"] = "foo"
     @t["D"] = "fox"
@@ -52,9 +52,18 @@ describe "Tree" do
       a << k
     end
     a[0].should == "D"
-    a.last.should == "c"
-    a.length.should == 5
-
+    a.last.should == "d"
+    a.length.should == 6
+  end
+  it "should collate sanely" do
+    @t[0] = "0"
+    @t[3] = "3"
+    @t["3"] = 3
+    s = []
+    @t.fold do |k, v|
+      s << k
+    end
+    s.should == 'x'
   end
   it "should do a descending keyscan" do
     a = [];

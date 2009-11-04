@@ -85,7 +85,7 @@ get "/:db/_changes" do
         }]
       }
       if params[:include_docs] == "true"
-        r["doc"] = doc
+        r["doc"] = doc.jh
       end
       r["deleted"] = true if doc.deleted
       rows << r

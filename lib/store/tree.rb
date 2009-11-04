@@ -5,11 +5,14 @@ class Tree
   attr_accessor :key
   attr_accessor :value
 
-  def initialize(k=nil, v=nil)
+  def initialize(k=nil, v=nil, &less)
     @left = nil
     @right = nil
     @key = k
     @value = v
+    @less = less || lambda do |a,b|
+      a < b
+    end
   end
 
   def []= k, v
@@ -34,10 +37,10 @@ class Tree
   
   def foldl sk=nil, ek=nil, &b
     @left.foldl(sk, ek, &b) if @left != nil
-    return if ek && ek <= @key
-    b.call(@key, @value) if !sk || @key >= sk
+    return if ek && @less.call(ek, @key)
+    b.call(@key, @value) if !sk || !@less.call(@key, sk)
     @right.foldl(sk, ek, &b) if @right != nil && 
-      (!sk || @right.key >= sk)
+      (!sk || !@less.call(@right.key, sk))
   end
   
   def foldr sk=nil, ek=nil, &b
@@ -59,7 +62,7 @@ class Tree
    if @key == nil || @key == k
     @key = k
     @value = v
-   elsif k <= @key
+   elsif @less.call(k, @key)
     if @left == nil
      @left = Tree.new k, v
     else

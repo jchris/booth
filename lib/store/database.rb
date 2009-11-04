@@ -17,8 +17,13 @@ class Database
     end
   end
   def all_docs opts={}, &b
+    puts "opts #{opts.inspect}"
+    [:startkey, :endkey].each do |k|
+      opts[k] = JSON.parse("[#{opts[k]}]")[0] if opts[k]
+    end
     @by_docid.fold(opts) do |docid, doc|
       next if doc.deleted
+      puts "all_docs #{docid}"
       b.call(docid, doc)
     end
   end
