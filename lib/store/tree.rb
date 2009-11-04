@@ -25,9 +25,11 @@ class Tree
   end
 
   def fold opts={}, &b
-    sk = opts[:startkey] || nil
-    ek = opts[:endkey] || nil
+    sk = opts[:startkey] || :none
+    ek = opts[:endkey] || :none
     desc = opts[:descending] || false
+    puts "sk #{sk.inspect}"
+    puts "ek #{ek.inspect}"
     if (desc)
       foldr(sk, ek, &b)
     else
@@ -35,20 +37,20 @@ class Tree
     end
   end
   
-  def foldl sk=nil, ek=nil, &b
+  def foldl sk=:none, ek=:none, &b
     @left.foldl(sk, ek, &b) if @left != nil
-    return if ek && @less.call(ek, @key)
-    b.call(@key, @value) if !sk || !@less.call(@key, sk)
+    return if (ek != :none) && @less.call(ek, @key)
+    b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
     @right.foldl(sk, ek, &b) if @right != nil && 
-      (!sk || !@less.call(@right.key, sk))
+      ((sk == :none) || !@less.call(@right.key, sk))
   end
   
   def foldr sk=nil, ek=nil, &b
     @right.foldr(sk, ek, &b) if @right != nil
-    return if ek && @less.call(ek, @key)
-    b.call(@key, @value) if !sk || !@less.call(@key, sk)
+    return if (ek != :none) && @less.call(ek, @key)
+    b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
     @left.foldr(sk, ek, &b) if @left != nil && 
-      (!sk || !@less.call(@left.key, sk))
+      ((sk == :none) || !@less.call(@left.key, sk))
   end
   
   def to_s
@@ -64,13 +66,13 @@ class Tree
     @value = v
    elsif @less.call(k, @key)
     if @left == nil
-     @left = Tree.new k, v
+     @left = Tree.new k, v, &@less
     else
      @left.insert k, v
     end
    else
     if @right == nil
-     @right = Tree.new k, v
+     @right = Tree.new k, v, &@less
     else
      @right.insert k, v
     end
