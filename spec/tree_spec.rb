@@ -2,7 +2,13 @@ require File.join(File.expand_path(File.dirname(__FILE__)),"spec_helper");
 
 describe "Tree" do
   before(:each) do
-    @t = Tree.new
+    @t = Tree.new do |a,b|
+      if a.class == b.class
+        a < b
+      else
+        a.class < b.class
+      end
+    end
     keys = %w{g d b a f c e}
     keys.each do |x| 
       @t[x] = x * 2;
@@ -55,16 +61,6 @@ describe "Tree" do
     a.last.should == "d"
     a.length.should == 6
   end
-  it "should collate sanely" do
-    @t[0] = "0"
-    @t[3] = "3"
-    @t["3"] = 3
-    s = []
-    @t.fold do |k, v|
-      s << k
-    end
-    s.should == 'x'
-  end
   it "should do a descending keyscan" do
     a = [];
     @t.fold(:descending => "true") do |k, v|
@@ -72,5 +68,33 @@ describe "Tree" do
     end
     a[0].should == "g"
     a[1].should == "f"
+  end
+end
+
+describe "custom tree" do
+  before(:each) do
+    @t = Tree.new do |a,b|
+      if a.class == b.class
+        a < b
+      else
+        a.class < b.class
+      end
+    end
+    keys = %w{g d b a f c e}
+    keys.each do |x| 
+      @t[x] = x * 2;
+    end
+  end
+  it "should collate properly" do
+    pending
+    @t[0] = "0"
+    @t[3] = "3"
+    @t["3"] = 3
+    s = []
+    @t.fold do |k, v|
+      s << k
+    end
+    s[0].should == 0
+    s[2].should == "3"
   end
 end
