@@ -28,8 +28,8 @@ class Tree
     sk = opts[:startkey] || :none
     ek = opts[:endkey] || :none
     desc = opts[:descending] || false
-    puts "sk #{sk.inspect}"
-    puts "ek #{ek.inspect}"
+    # puts "sk #{sk.inspect}"
+    # puts "ek #{ek.inspect}"
     if (desc)
       foldr(sk, ek, &b)
     else

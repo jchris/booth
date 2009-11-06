@@ -32,6 +32,26 @@ describe "Doc" do
       @d.body["foo"].should == "box"    
     end
   end
+  describe "deleting a doc" do
+    before(:each) do
+      @r = @d.rev
+      @d.update({
+        "_id" => "awesome",
+        "_rev" => @r,
+        "_deleted" => true
+      })
+    end
+    it "should be deleted" do
+      @d.deleted.should be_true
+    end
+    it "should update without a rev" do
+      @d.update({
+        "_id" => "awesome",
+        "totally_new" => "yeah"
+      })
+      @d.jh["totally_new"].should == "yeah"
+    end
+  end
   describe "updating it with a conflict" do
     before(:each) do
       @r = @d.rev

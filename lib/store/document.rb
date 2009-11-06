@@ -44,7 +44,7 @@ class Document
     end
     
     # check rev
-    if @rev && jdoc["_rev"] != @rev
+    if !@deleted && @rev && jdoc["_rev"] != @rev
       if params[:all_or_nothing] == "true"
         return write_conflict(jdoc)
       else

@@ -90,7 +90,8 @@ get "/:db/_changes" do
       r["deleted"] = true if doc.deleted
       rows << r
     end
-    j(200, {"results" => rows,"total_rows" => db.doc_count})
+    # if params[:feed] == "continuous"
+    j(200, {"results" => rows,"total_rows" => db.doc_count,"last_seq" => db.seq})
   end
 end
 
