@@ -61,6 +61,15 @@ Some tests require commenting out -- there are certain features (for instance: k
 
 Also -- incremental improvements help a lot. Even getting one more assertion to pass is a patch I'll merge.
 
+There is a Ruby RSpec suite you can run like this:
+
+    spec spec/
+
+But I prefer to run it with autospec
+
+    sudo gem install ZenTest
+    autospec
+
 ### High-level status
 
 The Tree class is getting most of the needed features, but could be self-balancing. Also it still needs analysis about which are public and private methods.
