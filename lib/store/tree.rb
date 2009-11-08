@@ -6,6 +6,7 @@ class Tree
   attr_accessor :value
 
   def initialize(k=nil, v=nil, &less)
+    # puts "new k #{k.inspect}"
     @left = nil
     @right = nil
     @key = k
@@ -39,7 +40,7 @@ class Tree
   
   def foldl sk=:none, ek=:none, &b
     @left.foldl(sk, ek, &b) if @left != nil
-    puts "foldl @key #{@key.inspect}"
+    # puts "foldl @key #{@key.inspect}"
     return if (ek != :none) && @less.call(ek, @key)
     b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
     @right.foldl(sk, ek, &b) if @right != nil && 

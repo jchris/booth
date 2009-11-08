@@ -8,9 +8,9 @@ class View
     @reduce = reduce
     @seq = 0
     @index = Tree.new do |a,b|
-      puts "Q a #{a.inspect} b #{b.inspect}"
+      # puts "Q a #{a.inspect} b #{b.inspect}"
       r = View.less_json(a, b)
-      puts "R #{r.inspect}"
+      # puts "R #{r.inspect}"
       r
     end
   end
@@ -28,7 +28,7 @@ class View
   class << self
     # view collation
     def less_json a, b
-      puts "less_json\n  a #{a.inspect}\n  b #{b.inspect}"
+      # puts "less_json\n  a #{a.inspect}\n  b #{b.inspect}"
       type_a = type_sort(a)
       type_b = type_sort(b)
       # puts "a #{a} type_a #{type_a}"
@@ -64,8 +64,10 @@ class View
       case type
       when 0
         atom_sort(a) < atom_sort(b)
+      when 2
+        less_string(a, b)
       when 3
-        less_array(a, b)
+        less_array(a.clone, b.clone)
       when 4
         less_hash(a, b)
       else
@@ -83,7 +85,7 @@ class View
       end
     end
     def less_array(a, b)
-      puts " less_array(a, b) a #{a.inspect} b #{b.inspect}"
+      # puts " less_array(a, b) a #{a.inspect} b #{b.inspect}"
       if a.length == 0 || b.length == 0
         if b.length == 0
           return false
@@ -102,6 +104,16 @@ class View
         less_array(a, b)
       end
     end
+    
+    def less_hash(a, b)
+      aa = a.to_a
+      bb = b.to_a
+      less_array(aa, bb)
+    end
+    
+    def less_string(a, b)
+      a.downcase < b.downcase
+    end
   end
   
   # implementation functions
@@ -116,7 +128,7 @@ class View
           next unless r
           key = r[0]
           value = r[1]
-          puts "insert key #{[key, doc.id].inspect}"
+          # puts "insert key #{[key, doc.id].inspect}"
           @index[[key, doc.id]] = value
         end
         @seq = db_seq
@@ -126,7 +138,7 @@ class View
   def runQuery(params)
     rows = []
     @index.fold(params) do |view_key, value|
-      puts "view_key #{view_key.inspect}"
+      # puts "view_key #{view_key.inspect}"
       # puts "value #{value.inspect}"
       
       key = view_key[0]

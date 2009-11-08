@@ -27,7 +27,9 @@ describe "View with collated docs" do
       false, true,
       1, 2, 3.4, 5,
       "a", "A", "aa", "b", "Ba", "bb",
-      ["a"], ["b"], ["b","c"], ["b", "c", "a"]
+      ["a"], ["b"], ["b","c"], ["b", "c", "a"],
+      {"a" => 1}, {"a" => 2}, {"b" => 1}, {"b" => 2},
+      {"b" => 2, "a" => 1}, {"b"=> 2, "c"=> 2}
       ]
     
     @keys.each_with_index do |key, i|
