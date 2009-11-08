@@ -6,7 +6,7 @@ class Tree
   attr_accessor :value
 
   def initialize(k=nil, v=nil, &less)
-    @trace = true
+    @trace = false
     trace "new k #{k.inspect}"
     @left = nil
     @right = nil

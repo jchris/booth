@@ -17,9 +17,9 @@ class View
 
   # responds to http requests
   # TODO, this should not buffer
-  def query p={}
+  def query p={}, &fun
     updateView
-    rows = runQuery(p)
+    rows = runQuery(p, &fun)
     {
       :rows => rows
     }
@@ -161,7 +161,7 @@ class View
     p
   end
   
-  def runQuery(params)
+  def runQuery(params, &fun)
     rows = []
 
     @index.fold(queryParams(params)) do |view_key, value|
@@ -170,11 +170,16 @@ class View
       
       key = view_key[0]
       id = view_key[1]
-      rows << {
+      row =  {
         :id => id,
         :key => key,
         :value => value
       }
+      if fun
+        fun.call(row)
+      else
+        rows << row
+      end
     end
     rows
   end

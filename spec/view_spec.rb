@@ -41,6 +41,7 @@ describe "View with collated docs" do
     @v = View.new(@db, map)
   end
   it "should collate properly" do
+    # puts "view collate"
     result = @v.query
     result[:rows].each_with_index do |row, i|
       # puts "row #{row.inspect}"
@@ -49,17 +50,23 @@ describe "View with collated docs" do
   end
   it "should support key ranges" do
     puts "view key ranges"
-    result = @v.query(:startkey => "aa", :endkey => "bb")
-    result[:rows].each_with_index do |row, i|
-      puts "row #{row.inspect}"
-      # row[:key].should == @keys[i]
+    rows = []                   # endkey_inclusive?
+    @v.query(:startkey => "aa", :endkey => "bb ") do |row|
+      # puts "row #{row.inspect}"
+      rows << row
     end
-    result[:rows].length.should == 5
-    result[:rows][0].id.should == "9"
+    rows[0][:key].should == "aa"
+    rows.length.should == 4
+    rows[3][:key].should == "bb"
+  end
+  it "should support key lookups" do
+    result = @v.query(:startkey => "aa", :endkey => "aa")
+    result[:rows].length.should == 1
+    result[:rows][0][:key].should == "aa"
   end
   it "should support key lookups" do
     result = @v.query(:key => "aa")
     result[:rows].length.should == 1
-    result[:rows][0].id.should == "9"
+    result[:rows][0][:key].should == "aa"
   end
 end
