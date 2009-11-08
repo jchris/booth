@@ -70,16 +70,3 @@ But I prefer to run it with autospec
     sudo gem install ZenTest
     autospec
 
-### High-level status
-
-The Tree class is getting most of the needed features, but could be self-balancing. Also it still needs analysis about which are public and private methods.
-
-Database and Document are mostly right, but some thought needs to go into a JSON abstraction layer for documents.
-
-The Sinatra parts are pretty self explanatory.
-
-Temp views barely work. They are recalculated at run-time for every query, and don't have start and end keys yet. However, the do use the couchjs/main.js CouchDB JavaScript process, so once they are hooked to proper Trees they should be mostly real.
-
-I'm really trying hard not too get to Ruby-ish with the coding style, so please hold back on "I refactored and everything's a module..." refactors. The purpose of this CouchDB implementation isn't to be perfect, but to be an easy reference for people considering porting CouchDB to other languages.
-
-
