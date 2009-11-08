@@ -39,6 +39,7 @@ class Tree
   
   def foldl sk=:none, ek=:none, &b
     @left.foldl(sk, ek, &b) if @left != nil
+    puts "foldl @key #{@key.inspect}"
     return if (ek != :none) && @less.call(ek, @key)
     b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
     @right.foldl(sk, ek, &b) if @right != nil && 
@@ -61,42 +62,24 @@ class Tree
   end
   
   def insert(k, v)
-   if @key == nil || @key == k
-    @key = k
-    @value = v
-   elsif @less.call(k, @key)
-    if @left == nil
-     @left = Tree.new k, v, &@less
+    if @key == nil || @key == k
+      @key = k
+      @value = v
+    elsif @less.call(k, @key)
+      if @left == nil
+        @left = Tree.new k, v, &@less
+      else
+        @left.insert k, v
+      end
     else
-     @left.insert k, v
+      if @right == nil
+        @right = Tree.new k, v, &@less
+      else
+        @right.insert k, v
+      end
     end
-   else
-    if @right == nil
-     @right = Tree.new k, v, &@less
-    else
-     @right.insert k, v
-    end
-   end
   end
-
-  def inorder()
-   @left.inorder {|y| yield y} if @left != nil
-   yield @key, @value
-   @right.inorder {|y| yield y} if @right != nil
-  end
-
-  def preorder()
-   yield @key, @value
-   @left.preorder {|y| yield y} if @left != nil
-   @right.preorder {|y| yield y} if @right != nil
-  end
-
-  def postorder()
-   @left.postorder {|y| yield y} if @left != nil
-   @right.postorder {|y| yield y} if @right != nil
-   yield @key, @value
-  end
-
+  
   def search(k)
    if self.key == k
     return self
@@ -108,6 +91,27 @@ class Tree
    end
    nil
   end
+  
+  
+  def inorder()
+   @left.inorder {|y| yield y} if @left != nil
+   yield @key, @value
+   @right.inorder {|y| yield y} if @right != nil
+  end
+  # 
+  # def preorder()
+  #  yield @key, @value
+  #  @left.preorder {|y| yield y} if @left != nil
+  #  @right.preorder {|y| yield y} if @right != nil
+  # end
+  # 
+  # def postorder()
+  #  @left.postorder {|y| yield y} if @left != nil
+  #  @right.postorder {|y| yield y} if @right != nil
+  #  yield @key, @value
+  # end
+  # 
+
 
   # def traverse()
   #   list = []

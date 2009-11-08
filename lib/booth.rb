@@ -65,5 +65,5 @@ end
 load 'global.rb'
 load 'db.rb'
 load 'doc.rb'
-load 'view.rb'
+load 'views.rb'
 

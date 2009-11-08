@@ -63,21 +63,29 @@ couchTests.view_collation = function(debug) {
                            // that doesn't preserve order)
   values.push({b:2, c:2});
 
-  for (var i=0; i<values.length; i++) {
+  for (var i = values.length - 1; i >= 0; i--){
     db.save({_id:(i).toString(), foo:values[i]});
-  }
+    // values[i]
+  };
+
+  // for (var i=0; i<values.length; i++) {
+  //   db.save({_id:(i).toString(), foo:values[i]});
+  // }
 
   var queryFun = function(doc) { emit(doc.foo, null); };
   var rows = db.query(queryFun).rows;
   for (i=0; i<values.length; i++) {
     T(equals(rows[i].key, values[i]));
   }
-
+  return;
+  
   // everything has collated correctly. Now to check the descending output
   rows = db.query(queryFun, null, {descending: true}).rows;
   for (i=0; i<values.length; i++) {
     T(equals(rows[i].key, values[values.length - 1 -i]));
   }
+
+
 
   // now check the key query args
   for (i=1; i<values.length; i++) {

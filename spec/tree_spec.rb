@@ -80,7 +80,27 @@ describe "Tree" do
     a[1].should == "f"
   end
 end
-
+describe "mixed-key tree" do
+  
+  it "should return proper key objects" do
+    t = Tree.new do |a,b|
+      if a.class == b.class
+        a < b
+      else
+        a.class < b.class
+      end
+    end
+    t[4] = "ok"
+    t["b"] = "bee"
+    r = []
+    t.fold do |key, value|
+      r << key
+    end
+    r[0].should == 4
+    r[1].should == "b"
+    t["b"].should == "bee"
+  end
+end
 describe "custom tree" do
   before(:each) do
     @t = Tree.new do |a,b|

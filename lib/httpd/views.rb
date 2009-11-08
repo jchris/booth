@@ -1,4 +1,4 @@
-require 'query_server'
+require 'view'
 
 post "/:db/_temp_view/?" do
   with_db(params[:db]) do |db|
