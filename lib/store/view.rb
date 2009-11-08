@@ -17,9 +17,9 @@ class View
 
   # responds to http requests
   # TODO, this should not buffer
-  def query params={}
+  def query p={}
     updateView
-    rows = runQuery(params)
+    rows = runQuery(p)
     {
       :rows => rows
     }
@@ -111,8 +111,17 @@ class View
       less_array(aa, bb)
     end
     
+    # this should really be using icu for correctness
+    # TODO http://github.com/jchris/icu4r
     def less_string(a, b)
-      a.downcase < b.downcase
+      ad = a.downcase 
+      bd = b.downcase
+      if ad == bd
+        # compare with case to approximate ICU
+        a > b 
+      else
+        ad < bd
+      end
     end
   end
   
@@ -135,9 +144,27 @@ class View
       end
     end
   end
+  
+  def queryParams(p)
+    # handle key =
+    if p[:key]
+      p[:startkey] = p[:key]
+      p[:endkey] = p[:key]
+    end
+    # handle [key, docid]
+    if p[:startkey]
+      p[:startkey] = [p[:startkey], p[:startkey_docid]]
+    end
+    if p[:endkey]
+      p[:endkey] = [p[:endkey], p[:endkey_docid]]
+    end
+    p
+  end
+  
   def runQuery(params)
     rows = []
-    @index.fold(params) do |view_key, value|
+
+    @index.fold(queryParams(params)) do |view_key, value|
       # puts "view_key #{view_key.inspect}"
       # puts "value #{value.inspect}"
       

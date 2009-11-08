@@ -3,8 +3,8 @@ require 'view'
 post "/:db/_temp_view/?" do
   with_db(params[:db]) do |db|
     req = JSON.parse(request.body.read)
-    view = buildView(db, req["map"], req["reduce"])
-    j(200, view)
+    v = View.new(db, req["map"], req["reduce"])
+    j(200, v.query(view_params(params)))
   end
 end
 

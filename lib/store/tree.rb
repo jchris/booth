@@ -6,7 +6,8 @@ class Tree
   attr_accessor :value
 
   def initialize(k=nil, v=nil, &less)
-    # puts "new k #{k.inspect}"
+    @trace = true
+    trace "new k #{k.inspect}"
     @left = nil
     @right = nil
     @key = k
@@ -14,6 +15,10 @@ class Tree
     @less = less || lambda do |a,b|
       a < b
     end
+  end
+
+  def trace m
+    puts m if @trace
   end
 
   def []= k, v
@@ -29,8 +34,8 @@ class Tree
     sk = opts[:startkey] || :none
     ek = opts[:endkey] || :none
     desc = opts[:descending] || false
-    # puts "sk #{sk.inspect}"
-    # puts "ek #{ek.inspect}"
+    trace "sk #{sk.inspect}"
+    trace "ek #{ek.inspect}"
     if (desc)
       foldr(sk, ek, &b)
     else
@@ -39,12 +44,16 @@ class Tree
   end
   
   def foldl sk=:none, ek=:none, &b
+    trace "foldl preorder @key #{@key.inspect}"
     @left.foldl(sk, ek, &b) if @left != nil
-    # puts "foldl @key #{@key.inspect}"
+    trace "foldl inorder @key #{@key.inspect}"
     return if (ek != :none) && @less.call(ek, @key)
+    trace "foldl yield @key #{@key.inspect}"
     b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
+    trace "foldl prepostorder @key #{@key.inspect}"
     @right.foldl(sk, ek, &b) if @right != nil && 
       ((sk == :none) || !@less.call(@right.key, sk))
+    trace "foldl postorder @key #{@key.inspect}"
   end
   
   def foldr sk=nil, ek=nil, &b
@@ -63,6 +72,7 @@ class Tree
   end
   
   def insert(k, v)
+    trace "insert k #{k} @key #{@key}"
     if @key == nil || @key == k
       @key = k
       @value = v

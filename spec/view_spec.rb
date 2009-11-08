@@ -32,7 +32,7 @@ describe "View with collated docs" do
       {"b" => 2, "a" => 1}, {"b"=> 2, "c"=> 2}
       ]
     
-    @keys.each_with_index do |key, i|
+    @keys.reverse.each_with_index do |key, i|
       @db.put({"_id" => i.to_s, "foo" => key})
     end
     
@@ -46,5 +46,20 @@ describe "View with collated docs" do
       # puts "row #{row.inspect}"
       row[:key].should == @keys[i]
     end
+  end
+  it "should support key ranges" do
+    puts "view key ranges"
+    result = @v.query(:startkey => "aa", :endkey => "bb")
+    result[:rows].each_with_index do |row, i|
+      puts "row #{row.inspect}"
+      # row[:key].should == @keys[i]
+    end
+    result[:rows].length.should == 5
+    result[:rows][0].id.should == "9"
+  end
+  it "should support key lookups" do
+    result = @v.query(:key => "aa")
+    result[:rows].length.should == 1
+    result[:rows][0].id.should == "9"
   end
 end

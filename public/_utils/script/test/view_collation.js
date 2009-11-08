@@ -77,7 +77,6 @@ couchTests.view_collation = function(debug) {
   for (i=0; i<values.length; i++) {
     T(equals(rows[i].key, values[i]));
   }
-  return;
   
   // everything has collated correctly. Now to check the descending output
   rows = db.query(queryFun, null, {descending: true}).rows;
@@ -85,14 +84,14 @@ couchTests.view_collation = function(debug) {
     T(equals(rows[i].key, values[values.length - 1 -i]));
   }
 
-
-
   // now check the key query args
   for (i=1; i<values.length; i++) {
     var queryOptions = {key:values[i]};
     rows = db.query(queryFun, null, queryOptions).rows;
     T(rows.length == 1 && equals(rows[0].key, values[i]));
   }
+
+  return;
 
   // test inclusive_end=true (the default)
   // the inclusive_end=true functionality is limited to endkey currently
