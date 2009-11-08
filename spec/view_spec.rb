@@ -59,7 +59,7 @@ describe "View with collated docs" do
     rows.length.should == 4
     rows[3][:key].should == "bb"
   end
-  it "should support key lookups" do
+  it "should support short key ranges" do
     result = @v.query(:startkey => "aa", :endkey => "aa")
     result[:rows].length.should == 1
     result[:rows][0][:key].should == "aa"
