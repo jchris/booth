@@ -46,22 +46,24 @@ class Tree
     else 
       ek = :none
     end
-    desc = opts["descending"] || false
+    fwd = opts["descending"] != "true"
     inc_end = (opts["inclusive_end"] != "false")
     trace "sk #{sk.inspect}"
     trace "ek #{ek.inspect}"
     trace "inc_end #{inc_end.inspect}"
-    if (desc)
-      foldr(sk, ek, inc_end, &b)
+    if (!fwd)
+      foldint(ek, sk, inc_end, fwd, &b)
     else
-      foldl(sk, ek, inc_end, &b)
+      foldint(sk, ek, inc_end, fwd, &b)
     end
   rescue PassedEnd
   end
   
-  def foldl sk, ek, inc_end, &b
+  def foldint sk, ek, inc_end, fwd, &b
+    front = fwd ? @left : @right
+    back = fwd ? @right : @left
     trace "foldl preorder @key #{@key.inspect}"
-    @left.foldl(sk, ek, inc_end, &b) if @left != nil && ((sk == :none) || !@less.call(@key, sk))
+    front.foldint(sk, ek, inc_end, fwd, &b) if front != nil && ((sk == :none) || !@less.call(@key, sk))
     trace "foldl inorder @key #{@key.inspect}"
     if (ek != :none) 
       if inc_end
@@ -82,18 +84,18 @@ class Tree
       b.call(@key, @value)
     end
     trace "foldl prepostorder @key #{@key.inspect}"
-    @right.foldl(sk, ek, inc_end, &b) if @right != nil && 
-      ((sk == :none) || !@less.call(@right.key, sk))
+    back.foldint(sk, ek, inc_end, fwd, &b) if back != nil && 
+      ((sk == :none) || !@less.call(back.key, sk))
     trace "foldl postorder @key #{@key.inspect}"
   end
   
-  def foldr sk, ek, inc_end, &b
-    @right.foldr(sk, ek, inc_end, &b) if @right != nil
-    return if (ek != :none) && @less.call(ek, @key)
-    b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
-    @left.foldr(sk, ek, inc_end, &b) if @left != nil && 
-      ((sk == :none) || !@less.call(@left.key, sk))
-  end
+  # def foldr sk, ek, inc_end, &b
+  #   @right.foldr(sk, ek, inc_end, &b) if @right != nil
+  #   return if (ek != :none) && @less.call(ek, @key)
+  #   b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
+  #   @left.foldr(sk, ek, inc_end, &b) if @left != nil && 
+  #     ((sk == :none) || !@less.call(@left.key, sk))
+  # end
   
   def to_s
      "[" +
