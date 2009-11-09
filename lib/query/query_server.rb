@@ -17,11 +17,11 @@ class QueryServer
   def self.run(trace = false)
     puts "launching #{Command}" if trace
     if block_given?
-      
       IO.popen(Command, "r+") do |io|
         qs = QueryServer.new(io, trace)
-        yield qs
+        result = yield qs
         qs.close
+        result
       end
     else
       io = IO.popen(Command, "r+")

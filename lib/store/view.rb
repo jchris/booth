@@ -21,7 +21,8 @@ class View
     updateView
     rows = runQuery(p, &fun)
     {
-      :rows => rows
+      :rows => rows,
+      :total_rows => rows.length
     }
   end
   
@@ -192,7 +193,19 @@ class View
         rows << row
       end
     end
-    rows
+    if @reduce
+      QueryServer.run do |qs|
+        qs.reset!
+        kvs = []
+        rows.each do |row|
+          kvs << [row[:key], row[:value]]
+        end
+        resp = qs.run(["reduce", [@reduce], kvs])
+        [{:value => resp[1]}]
+      end
+    else
+      rows
+    end
   end
 end
 

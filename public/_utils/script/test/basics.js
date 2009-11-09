@@ -95,7 +95,6 @@ couchTests.basics = function(debug) {
   };
 
   results = db.query(mapFunction);
-
   // verify only one document found and the result value (doc.b).
   T(results.total_rows == 1 && results.rows[0].value == 16);
 
