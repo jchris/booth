@@ -146,6 +146,7 @@ class View
   end
   
   def queryParams(p)
+    # need to handle false and nil keys properly
     # handle key =
     if p[:key]
       p[:startkey] = p[:key]

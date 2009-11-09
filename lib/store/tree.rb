@@ -34,6 +34,7 @@ class Tree
   end
 
   def fold opts={}, &b
+    # need to handle false and nil keys properly
     sk = opts[:startkey] || :none
     ek = opts[:endkey] || :none
     desc = opts[:descending] || false
