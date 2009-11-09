@@ -6,7 +6,7 @@ class Tree
   attr_accessor :value
 
   def initialize(k=nil, v=nil, &less)
-    @trace = false
+    @trace = true
     trace "new k #{k.inspect}"
     @left = nil
     @right = nil
@@ -34,33 +34,49 @@ class Tree
     sk = opts[:startkey] || :none
     ek = opts[:endkey] || :none
     desc = opts[:descending] || false
+    inc_end = (opts[:inclusive_end] != "false")
     trace "sk #{sk.inspect}"
     trace "ek #{ek.inspect}"
+    # trace "inc_end #{inc_end.inspect}"
     if (desc)
-      foldr(sk, ek, &b)
+      foldr(sk, ek, inc_end, &b)
     else
-      foldl(sk, ek, &b)
+      foldl(sk, ek, inc_end, &b)
     end
   end
   
-  def foldl sk=:none, ek=:none, &b
+  def foldl sk=:none, ek=:none, inc_end=true, &b
     trace "foldl preorder @key #{@key.inspect}"
-    @left.foldl(sk, ek, &b) if @left != nil
+    @left.foldl(sk, ek, inc_end, &b) if @left != nil && ((sk == :none) || !@less.call(@key, sk))
     trace "foldl inorder @key #{@key.inspect}"
-    return if (ek != :none) && @less.call(ek, @key)
-    trace "foldl yield @key #{@key.inspect}"
-    b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
+    if (ek != :none) 
+      if inc_end
+        # return if ek < key
+        lt = @less.call(ek, @key) #|| !@less.call(@key, ek)
+        # trace "inc_end lt #{lt} ek #{ek} @key #{@key}"
+        return if lt
+      else
+        # return if ek <= key
+        lte = !@less.call(@key, ek)
+        trace "exc_end lte #{lte.inspect} ek #{ek.inspect} @key #{@key.inspect}"
+        return if lte
+      end
+    end
+    if (sk == :none) || !@less.call(@key, sk)
+      trace "foldl yield @key #{@key.inspect}"
+      b.call(@key, @value)
+    end
     trace "foldl prepostorder @key #{@key.inspect}"
-    @right.foldl(sk, ek, &b) if @right != nil && 
+    @right.foldl(sk, ek, inc_end, &b) if @right != nil && 
       ((sk == :none) || !@less.call(@right.key, sk))
     trace "foldl postorder @key #{@key.inspect}"
   end
   
-  def foldr sk=nil, ek=nil, &b
-    @right.foldr(sk, ek, &b) if @right != nil
+  def foldr sk=nil, ek=nil, inc_end=false, &b
+    @right.foldr(sk, ek, inc_end, &b) if @right != nil
     return if (ek != :none) && @less.call(ek, @key)
     b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
-    @left.foldr(sk, ek, &b) if @left != nil && 
+    @left.foldr(sk, ek, inc_end, &b) if @left != nil && 
       ((sk == :none) || !@less.call(@left.key, sk))
   end
   

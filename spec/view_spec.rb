@@ -50,9 +50,8 @@ describe "View with collated docs" do
   end
   it "should support key ranges" do
     puts "view key ranges"
-    rows = []                   # endkey_inclusive?
-    @v.query(:startkey => "aa", :endkey => "bb ") do |row|
-      # puts "row #{row.inspect}"
+    rows = []
+    @v.query(:startkey => "aa", :endkey => "bb") do |row|
       rows << row
     end
     rows[0][:key].should == "aa"
@@ -60,7 +59,7 @@ describe "View with collated docs" do
     rows[3][:key].should == "bb"
   end
   it "should support short key ranges" do
-    result = @v.query(:startkey => "aa", :endkey => "aa")
+    result = @v.query(:startkey => "aa", :endkey => "aa", :inclusive_end => "true")
     result[:rows].length.should == 1
     result[:rows][0][:key].should == "aa"
   end
@@ -68,5 +67,10 @@ describe "View with collated docs" do
     result = @v.query(:key => "aa")
     result[:rows].length.should == 1
     result[:rows][0][:key].should == "aa"
+  end
+  it "should support exclusive end key ranges" do
+    result = @v.query(:startkey => "aa", :endkey => "bb", :inclusive_end => "false")
+    result[:rows].last[:key].should == "Ba"
+    result[:rows].length.should == 3
   end
 end

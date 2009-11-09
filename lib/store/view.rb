@@ -150,13 +150,14 @@ class View
     if p[:key]
       p[:startkey] = p[:key]
       p[:endkey] = p[:key]
+      p[:inclusive_end] = "true"
     end
     # handle [key, docid]
     if p[:startkey]
       p[:startkey] = [p[:startkey], p[:startkey_docid]]
     end
     if p[:endkey]
-      p[:endkey] = [p[:endkey], p[:endkey_docid]]
+      p[:endkey] = [p[:endkey], (p[:endkey_docid] || {})]
     end
     p
   end
