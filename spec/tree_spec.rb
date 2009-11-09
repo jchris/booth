@@ -2,13 +2,7 @@ require File.join(File.expand_path(File.dirname(__FILE__)),"spec_helper");
 
 describe "Tree" do
   before(:each) do
-    @t = Tree.new do |a,b|
-      if a.class == b.class
-        a < b
-      else
-        a.class < b.class
-      end
-    end
+    @t = Tree.new
     keys = %w{g d b a f c e}
     keys.each do |x| 
       @t[x] = x * 2;
@@ -23,6 +17,7 @@ describe "Tree" do
       a << k
     end
     a[0].should == "a"
+    a.length.should == 7
   end
   it "should do a keyscan from a startkey" do
     a = [];
@@ -35,17 +30,29 @@ describe "Tree" do
     a[1].should == "d"
     a[2].should == "e"
   end
-  it "should do a keyscan from a startkey to and endkey" do
+  it "should do a keyscan from a startkey to an endkey" do
     a = [];
     @t.fold({
       :startkey => "c",
-      :endkey => "d "
+      :endkey => "d"
     }) do |k, v|
       a << k
     end
     a[0].should == "c"
     a[1].should == "d"
     a[2].should be_nil
+  end
+  it "should have inclusive_end=false" do
+    a = [];
+    @t.fold({
+      :startkey => "c",
+      :endkey => "d",
+      :inclusive_end => "false"
+    }) do |k, v|
+      a << k
+    end
+    a[0].should == "c"
+    a[1].should be_nil
   end
   it "should do a keyscan from startkey to endkey" do
     a = [];

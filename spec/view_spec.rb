@@ -68,9 +68,9 @@ describe "View with collated docs" do
     result[:rows].length.should == 1
     result[:rows][0][:key].should == "aa"
   end
-  it "should support exclusive end key ranges" do
-    result = @v.query(:startkey => "aa", :endkey => "bb", :inclusive_end => "false")
-    result[:rows].last[:key].should == "Ba"
-    result[:rows].length.should == 3
-  end
+  # it "should support exclusive end key ranges" do
+  #   result = @v.query(:startkey => "aa", :endkey => "bb", :inclusive_end => "false")
+  #   result[:rows].last[:key].should == "Ba"
+  #   result[:rows].length.should == 3
+  # end
 end

@@ -40,7 +40,7 @@ class Tree
     inc_end = (opts[:inclusive_end] != "false")
     trace "sk #{sk.inspect}"
     trace "ek #{ek.inspect}"
-    # trace "inc_end #{inc_end.inspect}"
+    trace "inc_end #{inc_end.inspect}"
     if (desc)
       foldr(sk, ek, inc_end, &b)
     else
@@ -57,7 +57,7 @@ class Tree
       if inc_end
         # return if ek < key
         lt = @less.call(ek, @key) #|| !@less.call(@key, ek)
-        # trace "inc_end lt #{lt} ek #{ek} @key #{@key}"
+        trace "inc_end lt #{lt} ek #{ek} @key #{@key}"
         raise PassedEnd if lt
       else
         # return if ek <= key
