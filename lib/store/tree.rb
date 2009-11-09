@@ -9,7 +9,7 @@ class Tree
   end
 
   def initialize(k=nil, v=nil, &less)
-    @trace = true
+    @trace = false
     trace "new k #{k.inspect}"
     @left = nil
     @right = nil
@@ -81,8 +81,8 @@ class Tree
       b.call(@key, @value)
     end
     trace "fold prepostorder @key #{@key.inspect}"
-    back.foldint(sk, ek, inc_end, fwd, &b) if back && 
-      ((sk == :none) || !@less.call(back.key, sk))
+    back.foldint(sk, ek, inc_end, fwd, &b) if back
+    # if back && ((sk == :none) || !@less.call(back.key, sk))
     trace "fold postorder @key #{@key.inspect}"
   end
 
