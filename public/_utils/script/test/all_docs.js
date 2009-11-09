@@ -90,7 +90,7 @@ couchTests.all_docs = function(debug) {
   // test the all docs collates sanely
   db.save({_id: "Z", foo: "Z"});
   db.save({_id: "a", foo: "a"});
-  console.log(db.allDocs({startkey: "4"}).rows);
+  console.log(db.allDocs({startkey: "A"}).rows);
   var rows = db.allDocs({startkey: "Z", endkey: "Z "}).rows;
   T(rows.length == 1);
 };

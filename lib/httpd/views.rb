@@ -4,16 +4,11 @@ post "/:db/_temp_view/?" do
   with_db(params[:db]) do |db|
     req = JSON.parse(request.body.read)
     v = View.new(db, req["map"], req["reduce"])
-    j(200, v.query(view_params(params)))
+    j(200, v.query(View.view_params(params)))
   end
 end
 
-def view_params p
-  ["startkey", "endkey", "key"].each do |k|
-    p[k] = fromJSON(p[k]) if p[k]
-  end
-  p
-end
+
 
 def fromJSON(v)
   JSON.parse("[#{v}]")[0]

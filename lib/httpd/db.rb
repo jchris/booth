@@ -60,7 +60,7 @@ end
 get "/:db/_all_docs" do
   with_db(params[:db]) do |db|
     rows = []
-    db.all_docs(params) do |docid, doc|
+    db.all_docs(View.view_params(params)) do |docid, doc|
       rows << {
         "id" => docid,
         "key" => docid,

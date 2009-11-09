@@ -124,6 +124,13 @@ class View
         ad < bd
       end
     end
+    
+    def view_params p
+      ["startkey", "endkey", "key"].each do |k|
+        p[k] = fromJSON(p[k]) if p[k]
+      end
+      p
+    end
   end
   
   # implementation functions
@@ -148,7 +155,6 @@ class View
   
   def queryParams(p)
     puts p.inspect
-    # need to handle false and nil keys properly
     ks = p.keys
     if ks.include?("key")
       p["startkey"] = p["key"]

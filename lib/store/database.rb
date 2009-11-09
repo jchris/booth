@@ -4,7 +4,9 @@ class Database
   attr_reader :seq
   attr_reader :doc_count
   def initialize
-    @by_docid = Tree.new
+    @by_docid = Tree.new do |a, b|
+      View.less_string(a,b)
+    end
     @by_seq = Tree.new
     @seq = 0
     @doc_count = 0
@@ -18,12 +20,15 @@ class Database
   end
   def all_docs opts={}, &b
     puts "opts #{opts.inspect}"
-    [:startkey, :endkey].each do |k|
-      opts[k] = JSON.parse("[#{opts[k]}]")[0] if opts[k]
+    ks = opts.keys
+    if ks.include?("key")
+      opts["startkey"] = opts["key"]
+      opts["endkey"] = opts["key"]
+      opts["inclusive_end"] = "true"
     end
     @by_docid.fold(opts) do |docid, doc|
       next if doc.deleted
-      puts "all_docs #{docid}"
+      # puts "all_docs #{docid}"
       b.call(docid, doc)
     end
   end

@@ -134,3 +134,35 @@ describe "custom tree" do
     s.last.should == 3
   end
 end
+
+describe "gapped tree" do
+  before(:each) do
+    @t = Tree.new do |a, b|
+      View.less_string(a,b)
+    end
+    keys = %w{0 3 2 a Z}
+    keys.each do |x| 
+      @t[x] = "ok";
+    end
+  end
+  it "should do a keyscan" do
+    a = [];
+    @t.fold() do |k, v|
+      a << k
+    end
+    a[0].should == "0"
+    a[1].should == "2"
+    a[4].should == "Z"
+    a.length.should == 5
+  end
+  it "should scan from a startkey" do
+    a = [];
+    @t.fold({
+      "startkey" => "4"
+    }) do |k, v|
+      a << k
+    end
+    a[0].should == "a"
+    a[1].should == "Z"
+  end
+end
