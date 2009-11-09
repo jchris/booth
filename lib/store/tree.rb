@@ -34,7 +34,6 @@ class Tree
   end
 
   def fold opts={}, &b
-    # need to handle false and nil keys properly
     keys = opts.keys
     if keys.include?("startkey")
       sk = opts["startkey"]
@@ -62,41 +61,31 @@ class Tree
   def foldint sk, ek, inc_end, fwd, &b
     front = fwd ? @left : @right
     back = fwd ? @right : @left
-    trace "foldl preorder @key #{@key.inspect}"
-    front.foldint(sk, ek, inc_end, fwd, &b) if front != nil && ((sk == :none) || !@less.call(@key, sk))
-    trace "foldl inorder @key #{@key.inspect}"
+    trace "fold preorder @key #{@key.inspect}"
+    front.foldint(sk, ek, inc_end, fwd, &b) if front && 
+      ((sk == :none) || !@less.call(@key, sk))
+    trace "fold inorder @key #{@key.inspect}"
     if (ek != :none) 
       if inc_end
-        # return if ek < key
-        lt = @less.call(ek, @key) #|| !@less.call(@key, ek)
+        lt = @less.call(ek, @key)
         trace "inc_end lt #{lt} ek #{ek} @key #{@key}"
         raise PassedEnd if lt
       else
-        # return if ek <= key
-        #   !(ek > @key)
         lte = !@less.call(@key, ek)
         trace "exc_end lte #{lte.inspect} ek #{ek.inspect} @key #{@key.inspect}"
         raise PassedEnd if lte
       end
     end
     if (sk == :none) || !@less.call(@key, sk)
-      trace "foldl yield @key #{@key.inspect}"
+      trace "fold yield @key #{@key.inspect}"
       b.call(@key, @value)
     end
-    trace "foldl prepostorder @key #{@key.inspect}"
-    back.foldint(sk, ek, inc_end, fwd, &b) if back != nil && 
+    trace "fold prepostorder @key #{@key.inspect}"
+    back.foldint(sk, ek, inc_end, fwd, &b) if back && 
       ((sk == :none) || !@less.call(back.key, sk))
-    trace "foldl postorder @key #{@key.inspect}"
+    trace "fold postorder @key #{@key.inspect}"
   end
-  
-  # def foldr sk, ek, inc_end, &b
-  #   @right.foldr(sk, ek, inc_end, &b) if @right != nil
-  #   return if (ek != :none) && @less.call(ek, @key)
-  #   b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)
-  #   @left.foldr(sk, ek, inc_end, &b) if @left != nil && 
-  #     ((sk == :none) || !@less.call(@left.key, sk))
-  # end
-  
+
   def to_s
      "[" +
      if left then left.to_s + "," else "" end +
