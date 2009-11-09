@@ -9,7 +9,7 @@ class Tree
   end
 
   def initialize(k=nil, v=nil, &less)
-    @trace = false
+    @trace = false  
     trace "new k #{k.inspect}"
     @left = nil
     @right = nil

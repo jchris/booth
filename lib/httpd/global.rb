@@ -11,6 +11,10 @@ post '/_restart' do
   j 200, "ok" => true
 end
 
+put '/_config/*' do
+  j 200, "ok" => true
+end
+
 get "/_uuids" do
   uuid = BOOTH_UUID
   count = if params[:count]
