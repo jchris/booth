@@ -9,7 +9,7 @@ post "/:db/_temp_view/?" do
 end
 
 def view_params p
-  [:startkey, :endkey, :key].each do |k|
+  ["startkey", "endkey", "key"].each do |k|
     p[k] = fromJSON(p[k]) if p[k]
   end
   p

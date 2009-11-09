@@ -146,19 +146,28 @@ class View
   end
   
   def queryParams(p)
+    puts p.inspect
     # need to handle false and nil keys properly
-    # handle key =
-    if p[:key]
-      p[:startkey] = p[:key]
-      p[:endkey] = p[:key]
-      p[:inclusive_end] = "true"
+    ks = p.keys
+    if ks.include?("key")
+      p["startkey"] = p["key"]
+      p["endkey"] = p["key"]
+      p["inclusive_end"] = "true"
     end
     # handle [key, docid]
-    if p[:startkey]
-      p[:startkey] = [p[:startkey], p[:startkey_docid]]
+    ks = p.keys
+    if ks.include?("startkey")
+      p["startkey"] = [p["startkey"], p["startkey_docid"]]
     end
-    if p[:endkey]
-      p[:endkey] = [p[:endkey], (p[:endkey_docid] || {})]
+    if ks.include?("endkey")
+      if ks.include?("endkey_docid")
+        ekd = p["endkey_docid"]
+      elsif p["inclusive_end"] == "false"
+        ekd = p["descending"] ? {} : ''
+      else
+        ekd = p["descending"] ? '' : {}
+      end
+      p["endkey"] = [p["endkey"], ekd]
     end
     p
   end

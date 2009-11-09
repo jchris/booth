@@ -22,7 +22,7 @@ describe "Tree" do
   it "should do a keyscan from a startkey" do
     a = [];
     @t.fold({
-      :startkey => "c"
+      "startkey" => "c"
     }) do |k, v|
       a << k
     end
@@ -33,8 +33,8 @@ describe "Tree" do
   it "should do a keyscan from a startkey to an endkey" do
     a = [];
     @t.fold({
-      :startkey => "c",
-      :endkey => "d"
+      "startkey" => "c",
+      "endkey" => "d"
     }) do |k, v|
       a << k
     end
@@ -45,9 +45,9 @@ describe "Tree" do
   it "should have inclusive_end=false" do
     a = [];
     @t.fold({
-      :startkey => "c",
-      :endkey => "d",
-      :inclusive_end => "false"
+      "startkey" => "c",
+      "endkey" => "d",
+      "inclusive_end" => "false"
     }) do |k, v|
       a << k
     end
@@ -59,8 +59,8 @@ describe "Tree" do
     @t["Z"] = "foo"
     @t["D"] = "fox"
     @t.fold({
-      :startkey => "B",
-      :endkey => "d"
+      "startkey" => "B",
+      "endkey" => "d"
     }) do |k, v|
       a << k
     end
@@ -73,14 +73,14 @@ describe "Tree" do
     @t["1"] = "x"
     @t["2"] = "x"
     a = []
-    @t.fold(:startkey => "c") do |k,v|
+    @t.fold("startkey" => "c") do |k,v|
       a << k
     end
     a.should == ["c", "d", "e", "f", "g"]
   end
   it "should do a descending keyscan" do
     a = [];
-    @t.fold(:descending => "true") do |k, v|
+    @t.fold("descending" => "true") do |k, v|
       a << k
     end
     a[0].should == "g"

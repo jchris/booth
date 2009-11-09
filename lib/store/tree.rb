@@ -35,10 +35,19 @@ class Tree
 
   def fold opts={}, &b
     # need to handle false and nil keys properly
-    sk = opts[:startkey] || :none
-    ek = opts[:endkey] || :none
-    desc = opts[:descending] || false
-    inc_end = (opts[:inclusive_end] != "false")
+    keys = opts.keys
+    if keys.include?("startkey")
+      sk = opts["startkey"]
+    else 
+      sk = :none
+    end
+    if keys.include?("endkey")
+      ek = opts["endkey"]
+    else 
+      ek = :none
+    end
+    desc = opts["descending"] || false
+    inc_end = (opts["inclusive_end"] != "false")
     trace "sk #{sk.inspect}"
     trace "ek #{ek.inspect}"
     trace "inc_end #{inc_end.inspect}"
@@ -50,7 +59,7 @@ class Tree
   rescue PassedEnd
   end
   
-  def foldl sk=:none, ek=:none, inc_end=true, &b
+  def foldl sk, ek, inc_end, &b
     trace "foldl preorder @key #{@key.inspect}"
     @left.foldl(sk, ek, inc_end, &b) if @left != nil && ((sk == :none) || !@less.call(@key, sk))
     trace "foldl inorder @key #{@key.inspect}"
@@ -78,7 +87,7 @@ class Tree
     trace "foldl postorder @key #{@key.inspect}"
   end
   
-  def foldr sk=nil, ek=nil, inc_end=false, &b
+  def foldr sk, ek, inc_end, &b
     @right.foldr(sk, ek, inc_end, &b) if @right != nil
     return if (ek != :none) && @less.call(ek, @key)
     b.call(@key, @value) if (sk == :none) || !@less.call(@key, sk)

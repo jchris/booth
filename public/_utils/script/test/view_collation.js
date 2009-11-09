@@ -91,7 +91,7 @@ couchTests.view_collation = function(debug) {
     T(rows.length == 1 && equals(rows[0].key, values[i]));
   }
 
-  return;
+  // return;
 
   // test inclusive_end=true (the default)
   // the inclusive_end=true functionality is limited to endkey currently
@@ -99,17 +99,17 @@ couchTests.view_collation = function(debug) {
   var rows = db.query(queryFun, null, {endkey : "b", inclusive_end:true}).rows;
   T(rows[rows.length-1].key == "b")
   // descending=true
-  var rows = db.query(queryFun, null, {endkey : "b",
-    descending:true, inclusive_end:true}).rows;
-  T(rows[rows.length-1].key == "b")
+  // var rows = db.query(queryFun, null, {endkey : "b",
+  //   descending:true, inclusive_end:true}).rows;
+  // T(rows[rows.length-1].key == "b")
 
   // test inclusive_end=false
   var rows = db.query(queryFun, null, {endkey : "b", inclusive_end:false}).rows;
   T(rows[rows.length-1].key == "aa")
   // descending=true
-  var rows = db.query(queryFun, null, {endkey : "b",
-    descending:true, inclusive_end:false}).rows;
-  T(rows[rows.length-1].key == "B")
+  // var rows = db.query(queryFun, null, {endkey : "b",
+  //   descending:true, inclusive_end:false}).rows;
+  // T(rows[rows.length-1].key == "B")
   
   var rows = db.query(queryFun, null, {
     endkey : "b", endkey_docid: "10",
@@ -119,5 +119,5 @@ couchTests.view_collation = function(debug) {
   var rows = db.query(queryFun, null, {
     endkey : "b", endkey_docid: "11",
     inclusive_end:false}).rows;
-  T(rows[rows.length-1].key == "b")
+  T(rows[rows.length-1].key == "b", "inclusive_end:false")
 };
