@@ -5,6 +5,9 @@ class Tree
   attr_accessor :key
   attr_accessor :value
 
+  class PassedEnd < StandardError
+  end
+
   def initialize(k=nil, v=nil, &less)
     @trace = true
     trace "new k #{k.inspect}"
@@ -43,6 +46,7 @@ class Tree
     else
       foldl(sk, ek, inc_end, &b)
     end
+  rescue PassedEnd
   end
   
   def foldl sk=:none, ek=:none, inc_end=true, &b
@@ -54,12 +58,13 @@ class Tree
         # return if ek < key
         lt = @less.call(ek, @key) #|| !@less.call(@key, ek)
         # trace "inc_end lt #{lt} ek #{ek} @key #{@key}"
-        return if lt
+        raise PassedEnd if lt
       else
         # return if ek <= key
+        #   !(ek > @key)
         lte = !@less.call(@key, ek)
         trace "exc_end lte #{lte.inspect} ek #{ek.inspect} @key #{@key.inspect}"
-        return if lte
+        raise PassedEnd if lte
       end
     end
     if (sk == :none) || !@less.call(@key, sk)

@@ -80,8 +80,8 @@ describe "Tree" do
     a[1].should == "f"
   end
 end
+
 describe "mixed-key tree" do
-  
   it "should return proper key objects" do
     t = Tree.new do |a,b|
       if a.class == b.class
@@ -116,7 +116,6 @@ describe "custom tree" do
     end
   end
   it "should collate properly" do
-    pending
     @t[0] = "0"
     @t[3] = "3"
     @t["3"] = 3
@@ -124,7 +123,7 @@ describe "custom tree" do
     @t.fold do |k, v|
       s << k
     end
-    s[0].should == 0
-    s[2].should == "3"
+    s[0].should == "3"
+    s.last.should == 3
   end
 end
