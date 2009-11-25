@@ -21,7 +21,7 @@ class View
   # this would be a fun patch because 
   # runQuery() already takes a block.
   def query p={}, &fun
-    updateView
+    updateView!
     rows = runQuery(p, &fun)
     {
       :rows => rows,
@@ -143,13 +143,14 @@ class View
   # implementation functions
   private
   
-  def updateView
+  # updates the view index to reflect current database state
+  def updateView!
     QueryServer.run do |qs|
       raise "qs fun fail" unless qs.run(["add_fun", @map])
       @db.by_seq(:startkey => @seq) do |db_seq, doc|
         fun_rows = qs.run(["map_doc", doc.jh])[0]
         fun_rows.each do |r|
-          next unless r
+          next unless r # TODO doesn't handle deletes properly
           key = r[0]
           value = r[1]
           # puts "insert key #{[key, doc.id].inspect}"
@@ -160,8 +161,47 @@ class View
     end
   end
   
+  def runQuery(params, &fun)
+    rows = []
+    @index.fold(queryParams(params)) do |view_key, value|
+      # puts "view_key #{view_key.inspect}"
+      # puts "value #{value.inspect}"
+      
+      key = view_key[0]
+      id = view_key[1]
+      row =  {
+        :id => id,
+        :key => key,
+        :value => value
+      }
+      if fun
+        fun.call(row)
+      else
+        rows << row
+      end
+    end
+    if @reduce
+      # currently we do the reduce at runtime.
+      # todo: support for group_level and incremental
+      # this will require a btree instead of a binary 
+      # tree, inorder to store the intermediate 
+      # reductions.
+      QueryServer.run do |qs|
+        qs.reset!
+        kvs = []
+        rows.each do |row|
+          kvs << [row[:key], row[:value]]
+        end
+        resp = qs.run(["reduce", [@reduce], kvs])
+        [{:value => resp[1]}]
+      end
+    else
+      rows
+    end
+  end
+
+  # impedence matcher
   def queryParams(p)
-    puts p.inspect
     ks = p.keys
     if ks.include?("key")
       p["startkey"] = p["key"]
@@ -184,41 +224,6 @@ class View
       p["endkey"] = [p["endkey"], ekd]
     end
     p
-  end
-  
-  def runQuery(params, &fun)
-    rows = []
-
-    @index.fold(queryParams(params)) do |view_key, value|
-      # puts "view_key #{view_key.inspect}"
-      # puts "value #{value.inspect}"
-      
-      key = view_key[0]
-      id = view_key[1]
-      row =  {
-        :id => id,
-        :key => key,
-        :value => value
-      }
-      if fun
-        fun.call(row)
-      else
-        rows << row
-      end
-    end
-    if @reduce
-      QueryServer.run do |qs|
-        qs.reset!
-        kvs = []
-        rows.each do |row|
-          kvs << [row[:key], row[:value]]
-        end
-        resp = qs.run(["reduce", [@reduce], kvs])
-        [{:value => resp[1]}]
-      end
-    else
-      rows
-    end
   end
 end
 
