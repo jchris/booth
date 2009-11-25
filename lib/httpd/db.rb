@@ -8,6 +8,14 @@ def with_db db
   end
 end
 
+get "/_all_dbs/?" do
+  a=[]
+  Booth.each do |k, v|
+    a << k
+  end
+  j(200, a)
+end
+
 
 put "/:db/?" do
   db = params[:db]
@@ -23,7 +31,8 @@ get "/:db/?" do
   with_db(params[:db]) do |db|
     j(200, {
       :db_name => params[:db],
-      :doc_count => db.doc_count
+      :doc_count => db.doc_count,
+      :disk_size => (db.doc_count * 339.2)
     })    
   end
 end

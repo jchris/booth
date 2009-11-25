@@ -43,6 +43,8 @@ couchTests.basics = function(debug) {
       "should return absolute Location header to newly created document");
   });
 
+  T(CouchDB.allDbs().length == 3)
+  
   // Get the database info, check the db_name
   T(db.info().db_name == "test_suite_db");
 

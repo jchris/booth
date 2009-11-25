@@ -15,6 +15,10 @@ put '/_config/*' do
   j 200, "ok" => true
 end
 
+get '/_config/*' do
+  j 200, "ok" => true
+end
+
 get "/_uuids" do
   uuid = BOOTH_UUID
   count = if params[:count]
