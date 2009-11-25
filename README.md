@@ -6,6 +6,10 @@ Booth is an attempt to get the [CouchDB Test Suite](http://127.0.0.1:5984/_utils
 
 This should hella easy because the CouchDB Test Suite just runs in the browser.
 
+Booth is pre-alpha software right now. 
+
+Don't forget to visit your Booth Futon's test suite page: [http://127.0.0.1:4567/_utils/couch_tests.html]()
+
 ## Protocol
 
 We think the CouchDB runtime can be implemented with varying levels of support.
