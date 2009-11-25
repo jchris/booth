@@ -1,4 +1,10 @@
 require 'base64'
+
+# Document represents a CouchDB document. It has a
+# Ruby hash body that is the JSON, and it handles
+# conflicts by keeping a tree of old revs around.
+# So far so good but the conflict handling is only
+# specified as well as the Futon test suite.
 class Document
   
   attr_accessor :seq
@@ -17,9 +23,15 @@ class Document
     @conflicts = []
     update(jdoc)
   end
-    
+
+  # This is the function that converts 
+  # a Document to JSON. The name is short 
+  # for JSON Hash and maybe I'd call it 
+  # to_jh if I were a Real Rubyist, but 
+  # for now it's jh.
   def jh(params={})
     if params[:rev] && params[:rev] != @rev
+      # go look up a specific rev from the conflicts
       find_rev(params[:rev]).jh(params)
     else
       doc = {}
@@ -37,6 +49,8 @@ class Document
     end
   end
   
+  # Update a document with some JSON. Here are a
+  # lot of the CouchDB validation business rules.
   def update jdoc, params={}
     # check id
     if !jdoc["_id"] || (jdoc["_id"] != @id)
@@ -51,6 +65,7 @@ class Document
         raise BoothError.new(409, "conflict", "rev mismatch, need '#{@rev}' for docid '#{@id}'", {:id => @id});
       end
     end
+    # validate that _fields are reserved for CouchDB
     validate_keys(jdoc)
     
     @rev = @rev ? new_rev() : (jdoc["_rev"] || new_rev())
@@ -68,14 +83,12 @@ class Document
     r
   end
   
+  # for compatibility with a CouchDB test
   def etag
     "\"#{@rev}\""
   end
   
-  def conflicts
-    []
-  end
-  
+  # read attachment 
   def attachment(name)
     if @attachments[name]
       @attachments[name]
@@ -83,7 +96,8 @@ class Document
       raise BoothError.new(404, "not_found", "missing attachment: '#{name}'");
     end
   end
-  
+
+  # save an attachment to memory.
   def attachment_put user_rev, name, att
     if self.rev != user_rev
       raise BoothError.new(409, "conflict", "attachment rev mismatch, need '#{self.rev}' for docid '#{self.id}'");

@@ -1,8 +1,15 @@
 require 'tree'
 require 'document'
+
+# This class represents an in-memory 
+# CouchDB database. It is designed to
+# support p2p-replication using CouchDB's
+# replication protocol.
 class Database
+  
   attr_reader :seq
   attr_reader :doc_count
+  
   def initialize
     @by_docid = Tree.new do |a, b|
       View.less_string(a,b)
@@ -11,6 +18,9 @@ class Database
     @seq = 0
     @doc_count = 0
   end
+  
+  # traverse what's happened since the 
+  # last time you asked
   def by_seq opts={}, &b
     @by_seq.fold(opts) do |seq, info|
       if (info)
@@ -18,8 +28,9 @@ class Database
       end
     end
   end
+  
+  # traverse the all_docs view, by docid
   def all_docs opts={}, &b
-    puts "opts #{opts.inspect}"
     ks = opts.keys
     if ks.include?("key")
       opts["startkey"] = opts["key"]
@@ -28,26 +39,16 @@ class Database
     end
     @by_docid.fold(opts) do |docid, doc|
       next if doc.deleted
-      # puts "all_docs #{docid}"
       b.call(docid, doc)
     end
   end
   
-  def delete docid, rev
-    doc = {
-      "_id" => docid,
-      "_rev" => rev,
-      "_deleted" => true
-    }
-    new_rev = put doc
-    @doc_count -= 1
-    new_rev
-  end
-  
+  # update the database, creating a new 
+  # doc  or updating and existing one.
   def put jdoc, params = {}
     doc = get_doc(jdoc["_id"])
     if doc
-      puts "stored doc.rev #{doc.rev}"
+      # puts "stored doc.rev #{doc.rev}"
       r = doc.update(jdoc, params)
       if r[:old_seq]
         @by_seq[r[:old_seq]] = nil
@@ -64,33 +65,8 @@ class Database
       @by_seq[@seq] = {:id => doc.id, :rev => doc.rev}
     end
   end
-  
-  # def putx doc, bulk = false, params = {}
-  #   doc = Document.new(self, doc)
-  #   if old_doc = get_doc(doc.id)
-  #     if old_doc.deleted || doc.rev == old_doc.rev
-  #       put_doc doc, old_doc
-  #     else
-  #       if bulk
-  #         if params[:all_or_nothing] == "true"
-  #           # write a conflict
-  #           put_doc doc, old_doc, :conflict
-  #         else
-  #           # skip conflicts
-  #           {
-  #             "id" => doc.id,
-  #             "error" => "conflict"              
-  #           }
-  #         end
-  #       else
-  #         raise BoothError.new(409, "conflict", "rev mismatch, need '#{old_doc.rev}' for docid '#{doc.id}'");
-  #       end
-  #     end
-  #   else
-  #     put_doc doc, nil
-  #   end
-  # end
 
+  # get a document by id
   def get docid, params={}
     doc = get_doc(docid, params)
     if !doc
@@ -101,9 +77,23 @@ class Database
       doc
     end
   end
+
+  # delete a document by id
+  def delete docid, rev
+    doc = {
+      "_id" => docid,
+      "_rev" => rev,
+      "_deleted" => true
+    }
+    new_rev = put doc
+    @doc_count -= 1
+    new_rev
+  end
   
   private
 
+  # this used to handle conflicts and stuff 
+  # before I pushed that code into document.rb
   def get_doc docid, params={}
     @by_docid[docid]
   end
