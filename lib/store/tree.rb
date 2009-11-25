@@ -1,3 +1,6 @@
+# This is a basic binary tree
+# You could build a btree that maintains this API.
+# If you did that'd be cool.
 class Tree
 
   attr_accessor :left
@@ -9,6 +12,7 @@ class Tree
   end
 
   def initialize(k=nil, v=nil, &less)
+    # set this to true to make it spew debug logging
     @trace = false  
     trace "new k #{k.inspect}"
     @left = nil
@@ -19,20 +23,33 @@ class Tree
       a < b
     end
   end
+  
+  # this is helpful for debugging
+  def to_s
+     "[" +
+     if left then left.to_s + "," else "" end +
+     key.inspect +
+     if right then "," + right.to_s else "" end + "]"
+  end
 
+  # spew traversal logs
   def trace m
     puts m if @trace
   end
 
+  # set a key/value
   def []= k, v
     insert(k, v)
   end
-  
+  # get a value by key
   def [] k
     n = search(k)
     n && n.value
   end
 
+  # visit the members of the btree in
+  # sorted order. this is the basis of
+  # replication and incremental map reduce.
   def fold opts={}, &b
     keys = opts.keys
     if keys.include?("startkey")
@@ -51,6 +68,8 @@ class Tree
     trace "ek #{ek.inspect}"
     trace "inc_end #{inc_end.inspect}"
     if (!fwd)
+      # we switch start and end key
+      # when the direction is backwards
       foldint(ek, sk, inc_end, fwd, &b)
     else
       foldint(sk, ek, inc_end, fwd, &b)
@@ -58,6 +77,10 @@ class Tree
   rescue PassedEnd
   end
   
+  protected
+  
+  # this is the internal tree index traversal algorithm.
+  # it's probably sub-optimal, but it works.
   def foldint sk, ek, inc_end, fwd, &b
     front = fwd ? @left : @right
     back = fwd ? @right : @left
@@ -85,14 +108,9 @@ class Tree
     # if back && ((sk == :none) || !@less.call(back.key, sk))
     trace "fold postorder @key #{@key.inspect}"
   end
-
-  def to_s
-     "[" +
-     if left then left.to_s + "," else "" end +
-     key.inspect +
-     if right then "," + right.to_s else "" end + "]"
-  end
   
+  # insert a value at a key
+  # will replace the old value
   def insert(k, v)
     trace "insert k #{k} @key #{@key}"
     if @key == nil || @key == k
@@ -113,51 +131,17 @@ class Tree
     end
   end
   
+  # return the node for a given key
   def search(k)
-   if self.key == k
-    return self
-   else
-    ltree = left != nil ? left.search(k) : nil
-    return ltree if ltree != nil
-    rtree = right != nil ? right.search(k) : nil
-    return rtree if rtree != nil
-   end
-   nil
+    if self.key == k
+      return self
+    else
+      ltree = left != nil ? left.search(k) : nil
+      return ltree if ltree != nil
+      rtree = right != nil ? right.search(k) : nil
+      return rtree if rtree != nil
+    end
+    nil
   end
-  
-  
-  def inorder()
-   @left.inorder {|y| yield y} if @left != nil
-   yield @key, @value
-   @right.inorder {|y| yield y} if @right != nil
-  end
-  # 
-  # def preorder()
-  #  yield @key, @value
-  #  @left.preorder {|y| yield y} if @left != nil
-  #  @right.preorder {|y| yield y} if @right != nil
-  # end
-  # 
-  # def postorder()
-  #  @left.postorder {|y| yield y} if @left != nil
-  #  @right.postorder {|y| yield y} if @right != nil
-  #  yield @key, @value
-  # end
-  # 
-
-
-  # def traverse()
-  #   list = []
-  #   yield @key, @value
-  #   list << @left if @left != nil
-  #   list << @right if @right != nil
-  #   loop do
-  #     break if list.empty?
-  #     node = list.shift
-  #     yield node.key, node.value
-  #     list << node.left if node.left != nil
-  #     list << node.right if node.right != nil
-  #   end
-  # end
 
 end

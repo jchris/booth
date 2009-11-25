@@ -179,12 +179,19 @@ class Document
     end
   end
   
+  # Revs are still just random, I'm waiting
+  # to see how that works, replicating with
+  # CouchDB. I hope it just works.
   def new_rev
     uuid()
   end
+  
+  # just a convenience name
   def uuid
     BOOTH_UUID.generate
   end
+  
+  # make sure all _fields are legal
   def validate_keys jdoc
     special_keys = %w{_id _rev _deleted _attachments}
     jdoc.each do |k,v|
@@ -194,6 +201,7 @@ class Document
     end
   end
   
+  # this is something that works but I'm not sure why.
   def write_conflict(jdoc)
     # first attempt to update an existing confict?
     # just create a new conflict
@@ -201,7 +209,8 @@ class Document
     @conflicts << doc
     {:info => {:id => doc.id, :rev => doc.rev}}
   end
-  
+
+  # reach in to send a conflict
   def find_rev r
     @conflicts.find{|c|c.rev == r}
   end
