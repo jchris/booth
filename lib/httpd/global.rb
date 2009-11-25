@@ -1,24 +1,27 @@
-
+# render couchdb's classic JSON welcome screen
+# this is where redirect to other servers would go
 get '/' do
   j 200, "couchdb"=>"Welcome","version"=>"0"
 end
 
+# just a stub for the tests, as booth is in-memory only
 post '/:db/_ensure_full_commit' do
   j 200, "ok" => true
 end
 
+# also stubs
 post '/_restart' do
   j 200, "ok" => true
 end
-
 put '/_config/*' do
   j 200, "ok" => true
 end
-
 get '/_config/*' do
   j 200, "ok" => true
 end
 
+
+# the uuid service works just like couchdb
 get "/_uuids" do
   uuid = BOOTH_UUID
   count = if params[:count]
@@ -35,11 +38,12 @@ get "/_uuids" do
 end
 
 
-# json error
+# json error handling
 def je code, name, message
   j code, {"error" => name, "reason" => message}
 end
 
+# json ok handling
 def j code, json, h = {}
   status code
   content_type "json"
@@ -47,6 +51,7 @@ def j code, json, h = {}
   json.to_json
 end
 
+# parse request
 def jbody message = "Request body must be a JSON object"
   json = JSON.parse(request.body.read)
   if !json || json.is_a?(Array)

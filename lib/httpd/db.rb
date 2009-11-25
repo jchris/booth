@@ -1,5 +1,5 @@
 
-
+# a magic block that gets your db for you.
 def with_db db
   if Booth[db]
     yield Booth[db]
@@ -8,6 +8,7 @@ def with_db db
   end
 end
 
+# for futon
 get "/_all_dbs/?" do
   a=[]
   Booth.each do |k, v|
@@ -16,7 +17,7 @@ get "/_all_dbs/?" do
   j(200, a)
 end
 
-
+# create a database
 put "/:db/?" do
   db = params[:db]
   if Booth[db]
@@ -27,6 +28,7 @@ put "/:db/?" do
   end
 end
 
+# get database info
 get "/:db/?" do
   with_db(params[:db]) do |db|
     j(200, {
@@ -37,6 +39,7 @@ get "/:db/?" do
   end
 end
 
+# delete a database
 delete "/:db/?" do
   db = params[:db]
   if Booth[db]
@@ -47,6 +50,7 @@ delete "/:db/?" do
   end
 end
 
+# upload docs in batch
 post "/:db/_bulk_docs" do
   with_db(params[:db]) do |db|
     j = jbody
@@ -66,6 +70,7 @@ post "/:db/_bulk_docs" do
   end
 end
 
+# view of all docs in the database
 get "/:db/_all_docs" do
   with_db(params[:db]) do |db|
     rows = []
@@ -81,7 +86,17 @@ get "/:db/_all_docs" do
     j(200, {"rows" => rows,"total_rows" => db.doc_count})
   end
 end
+post "/:db/_all_docs" do
+  with_db(params[:db]) do |db|
+    query = jbody
+    unless query["keys"].is_a?(Array)
+      raise BoothError.new(400, "bad_request", "`keys` member must be a array.");
+    end
+  end
+end
 
+
+# feed of changes to the database
 get "/:db/_changes" do
   with_db(params[:db]) do |db|
     rows = []
@@ -104,11 +119,4 @@ get "/:db/_changes" do
   end
 end
 
-post "/:db/_all_docs" do
-  with_db(params[:db]) do |db|
-    query = jbody
-    unless query["keys"].is_a?(Array)
-      raise BoothError.new(400, "bad_request", "`keys` member must be a array.");
-    end
-  end
-end
+
