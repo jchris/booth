@@ -1,8 +1,10 @@
 # document access
+
 get "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
     doc = db.get(docid, params)
+    # etags here needs a test to make me uncomment it
     # etag(doc.etag)
     if doc
       j(200, doc.jh(params))
@@ -12,6 +14,7 @@ get "/:db/:docid/?" do
   end
 end
 
+# create a doc without an id
 post "/:db/?" do
   with_db(params[:db]) do |db|
     doc = jbody("Document must be a JSON object")
@@ -26,12 +29,17 @@ post "/:db/?" do
   end
 end
 
+# update a document or create with an id
 put "/:db/:docid/?" do
   docid = params[:docid]
   with_db(params[:db]) do |db|
     doc = jbody("Document must be a JSON object")
+
+    # here's the action
     doc["_id"] = docid
     resp = db.put(doc)
+
+    # build the response (rev etc)
     resp["ok"] = true
     j(201, resp, {
         "Location" => ["",params[:db],docid].join('/')
@@ -39,6 +47,7 @@ put "/:db/:docid/?" do
   end
 end
 
+# delete a document
 delete "/:db/:docid/?" do
   docid = params[:docid]
   rev = params[:rev]
@@ -55,6 +64,7 @@ end
 
 # attachment handling
 
+# handles slashes for design doc attachements
 def docid_att_name(params)
   if params[:docid] == "_design"
     ps = params[:splat][0].split('/')
@@ -64,11 +74,9 @@ def docid_att_name(params)
   end
 end
 
-
+# get an attachment
 get "/:db/:docid/*" do
   docid, att_name = docid_att_name(params)
-  # docid = params[:docid]
-  # att_name = params[:splat][0]
   with_db(params[:db]) do |db|
     doc = db.get(docid)
     etag(doc.rev)
@@ -81,6 +89,7 @@ get "/:db/:docid/*" do
   end
 end
 
+# create or update an attachment on a doc
 put "/:db/:docid/*" do
   docid = params[:docid]
   rev = params[:rev]
@@ -93,6 +102,7 @@ put "/:db/:docid/*" do
       doc = db.get(docid)
       rev = doc.rev
     end
+    # create the attachment format (this could be packaged)
     att = {}
     att["data"] = request.body.read
     att["length"] = att["data"].length
@@ -103,6 +113,7 @@ put "/:db/:docid/*" do
   end
 end
 
+# delete a document
 delete "/:db/:docid/*" do
   docid = params[:docid]
   rev = params[:rev]

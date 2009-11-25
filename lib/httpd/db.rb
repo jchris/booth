@@ -8,7 +8,7 @@ def with_db db
   end
 end
 
-# for futon
+# for futon to list all dbs
 get "/_all_dbs/?" do
   a=[]
   Booth.each do |k, v|
@@ -55,6 +55,7 @@ post "/:db/_bulk_docs" do
   with_db(params[:db]) do |db|
     j = jbody
     docs = j["docs"]
+    # handle replication requests
     params[:all_or_nothing] = "true" if j["all_or_nothing"]
     results = docs.collect do |doc|
       if !doc["_id"]
@@ -86,6 +87,7 @@ get "/:db/_all_docs" do
     j(200, {"rows" => rows,"total_rows" => db.doc_count})
   end
 end
+# you can post query definitions to the all docs view as well
 post "/:db/_all_docs" do
   with_db(params[:db]) do |db|
     query = jbody
@@ -96,7 +98,17 @@ post "/:db/_all_docs" do
 end
 
 
-# feed of changes to the database
+# Feed of changes to the database:
+# Choose your own adventure.
+# 
+# This changes feed is not yet continuous
+# I'm sure it'd involve some completely sane
+# Ruby process management. It might be a good hack
+# for someone who's into that sort of thing.
+# 
+# Not a bad place to start for techniques: 
+# http://tomayko.com/writings/unicorn-is-unix
+# 
 get "/:db/_changes" do
   with_db(params[:db]) do |db|
     rows = []

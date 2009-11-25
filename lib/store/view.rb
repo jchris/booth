@@ -2,6 +2,7 @@ require 'database'
 require 'query_server'
 
 class View
+  
   def initialize db, map, reduce = nil
     @db = db
     @map = map
@@ -17,6 +18,8 @@ class View
 
   # responds to http requests
   # TODO, this should not buffer
+  # this would be a fun patch because 
+  # runQuery() already takes a block.
   def query p={}, &fun
     updateView
     rows = runQuery(p, &fun)
@@ -125,11 +128,15 @@ class View
       end
     end
     
+    # todo these 2 should move to a helper module
     def view_params p
       ["startkey", "endkey", "key"].each do |k|
         p[k] = fromJSON(p[k]) if p[k]
       end
       p
+    end
+    def fromJSON(v)
+      JSON.parse("[#{v}]")[0]
     end
   end
   
