@@ -127,7 +127,8 @@ get "/:db/_changes" do
       rows << r
     end
     # if params[:feed] == "continuous"
-    j(200, {"results" => rows,"total_rows" => db.doc_count,"last_seq" => db.seq})
+    # j(200, {"results" => rows,"total_rows" => db.doc_count,"last_seq" => db.seq})
+    changes rows
   end
 end
 

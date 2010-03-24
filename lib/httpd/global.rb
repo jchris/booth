@@ -51,6 +51,20 @@ def j code, json, h = {}
   json.to_json
 end
 
+def changes rows
+  status 200
+  content_type "json"
+  "{\"results\":[\n#{change_rows(rows)}],\n\"last_seq\":#{rows.length}}\n"
+end
+
+def change_rows rows
+  b = ""
+  rows.each do |r|
+    b = b + "#{r.to_json},\n"
+  end
+  b
+end
+
 # parse request
 def jbody message = "Request body must be a JSON object"
   json = JSON.parse(request.body.read)

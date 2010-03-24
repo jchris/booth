@@ -15,9 +15,9 @@ $LOAD_PATH.unshift File.join(filepath,"httpd")
 $LOAD_PATH.unshift File.join(filepath,"query")
 $LOAD_PATH.unshift File.join(filepath,"store")
 
-require 'database'
-
 Booth ||= {}
+
+require 'database'
 
 class BoothError < StandardError
   attr_reader :code

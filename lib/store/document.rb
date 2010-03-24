@@ -68,7 +68,7 @@ class Document
     # validate that _fields are reserved for CouchDB
     validate_keys(jdoc)
     
-    @rev = @rev ? new_rev() : (jdoc["_rev"] || new_rev())
+    @rev = @rev ? new_rev(@rev) : (jdoc["_rev"] || new_rev())
     @deleted = true if jdoc["_deleted"]
     @body = jdoc
     process_attachments!
@@ -108,7 +108,7 @@ class Document
     else
       @attachments[name] = att
     end
-    @rev = new_rev()
+    @rev = new_rev(@rev)
   end
 
   
@@ -182,8 +182,13 @@ class Document
   # Revs are still just random, I'm waiting
   # to see how that works, replicating with
   # CouchDB. I hope it just works.
-  def new_rev
-    uuid()
+  def new_rev old_rev=nil
+    if old_rev
+      num = old_rev.split('-')[0].to_i
+      "#{num +1}-#{uuid()}"
+    else
+      "1-#{uuid()}"
+    end
   end
   
   # just a convenience name
